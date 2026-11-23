@@ -35,6 +35,7 @@ Namespace Forms
             Me.lblBrandSub = New System.Windows.Forms.Label()
             Me.lblBrandTitle = New System.Windows.Forms.Label()
             Me.pnlLoginCard = New University_hostel_mgt.Controls.GlassPanel()
+            Me.btnStudentRegister = New University_hostel_mgt.Controls.GlassButton()
             Me.btnExitApp = New University_hostel_mgt.Controls.GlassButton()
             Me.btnLogin = New University_hostel_mgt.Controls.GlassButton()
             Me.lblStatusMessage = New System.Windows.Forms.Label()
@@ -235,6 +236,7 @@ Namespace Forms
             '
             Me.pnlLoginCard.BorderColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.pnlLoginCard.BorderWidth = 1.0!
+            Me.pnlLoginCard.Controls.Add(Me.btnStudentRegister)
             Me.pnlLoginCard.Controls.Add(Me.btnExitApp)
             Me.pnlLoginCard.Controls.Add(Me.btnLogin)
             Me.pnlLoginCard.Controls.Add(Me.lblStatusMessage)
@@ -254,6 +256,20 @@ Namespace Forms
             Me.pnlLoginCard.Size = New System.Drawing.Size(510, 509)
             Me.pnlLoginCard.TabIndex = 1
             '
+            'btnStudentRegister
+            '
+            Me.btnStudentRegister.BackColor = System.Drawing.Color.Transparent
+            Me.btnStudentRegister.CornerRadius = 12
+            Me.btnStudentRegister.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
+            Me.btnStudentRegister.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
+            Me.btnStudentRegister.HoverColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
+            Me.btnStudentRegister.Location = New System.Drawing.Point(36, 412)
+            Me.btnStudentRegister.Name = "btnStudentRegister"
+            Me.btnStudentRegister.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
+            Me.btnStudentRegister.Size = New System.Drawing.Size(438, 38)
+            Me.btnStudentRegister.TabIndex = 9
+            Me.btnStudentRegister.Text = "🎓 New Student? Create Account with DeKUT Email"
+            '
             'btnExitApp
             '
             Me.btnExitApp.BackColor = System.Drawing.Color.Transparent
@@ -261,11 +277,11 @@ Namespace Forms
             Me.btnExitApp.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
             Me.btnExitApp.DialogResult = System.Windows.Forms.DialogResult.Cancel
             Me.btnExitApp.HoverColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnExitApp.Location = New System.Drawing.Point(36, 430)
+            Me.btnExitApp.Location = New System.Drawing.Point(36, 458)
             Me.btnExitApp.Name = "btnExitApp"
             Me.btnExitApp.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnExitApp.Size = New System.Drawing.Size(438, 38)
-            Me.btnExitApp.TabIndex = 9
+            Me.btnExitApp.Size = New System.Drawing.Size(438, 36)
+            Me.btnExitApp.TabIndex = 10
             Me.btnExitApp.Text = "Exit Application"
             '
             'btnLogin
@@ -274,10 +290,10 @@ Namespace Forms
             Me.btnLogin.CornerRadius = 12
             Me.btnLogin.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(11, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(20, Byte), Integer))
             Me.btnLogin.HoverColor = System.Drawing.Color.FromArgb(CType(CType(34, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(94, Byte), Integer))
-            Me.btnLogin.Location = New System.Drawing.Point(36, 376)
+            Me.btnLogin.Location = New System.Drawing.Point(36, 362)
             Me.btnLogin.Name = "btnLogin"
             Me.btnLogin.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
-            Me.btnLogin.Size = New System.Drawing.Size(438, 44)
+            Me.btnLogin.Size = New System.Drawing.Size(438, 42)
             Me.btnLogin.TabIndex = 8
             Me.btnLogin.Text = "Sign In"
             '
@@ -286,9 +302,9 @@ Namespace Forms
             Me.lblStatusMessage.BackColor = System.Drawing.Color.Transparent
             Me.lblStatusMessage.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblStatusMessage.ForeColor = System.Drawing.Color.FromArgb(CType(CType(239, Byte), Integer), CType(CType(68, Byte), Integer), CType(CType(68, Byte), Integer))
-            Me.lblStatusMessage.Location = New System.Drawing.Point(36, 320)
+            Me.lblStatusMessage.Location = New System.Drawing.Point(36, 318)
             Me.lblStatusMessage.Name = "lblStatusMessage"
-            Me.lblStatusMessage.Size = New System.Drawing.Size(438, 45)
+            Me.lblStatusMessage.Size = New System.Drawing.Size(438, 38)
             Me.lblStatusMessage.TabIndex = 7
             Me.lblStatusMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             '
@@ -329,7 +345,7 @@ Namespace Forms
             Me.txtUsername.Location = New System.Drawing.Point(36, 175)
             Me.txtUsername.MinimumSize = New System.Drawing.Size(120, 38)
             Me.txtUsername.Name = "txtUsername"
-            Me.txtUsername.PlaceholderText = "Enter staff username"
+            Me.txtUsername.PlaceholderText = "Staff username or Student email (@students.dkut.ac.ke)"
             Me.txtUsername.Size = New System.Drawing.Size(438, 44)
             Me.txtUsername.TabIndex = 3
             Me.txtUsername.TextValue = ""
@@ -342,9 +358,9 @@ Namespace Forms
             Me.lblUsernameTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
             Me.lblUsernameTitle.Location = New System.Drawing.Point(36, 150)
             Me.lblUsernameTitle.Name = "lblUsernameTitle"
-            Me.lblUsernameTitle.Size = New System.Drawing.Size(60, 15)
+            Me.lblUsernameTitle.Size = New System.Drawing.Size(155, 15)
             Me.lblUsernameTitle.TabIndex = 2
-            Me.lblUsernameTitle.Text = "Username"
+            Me.lblUsernameTitle.Text = "Username or Student Email"
             '
             'lblSignInSub
             '
@@ -422,6 +438,7 @@ Namespace Forms
         Friend WithEvents txtPassword As University_hostel_mgt.Controls.GlassTextBox
         Friend WithEvents lblStatusMessage As System.Windows.Forms.Label
         Friend WithEvents btnLogin As University_hostel_mgt.Controls.GlassButton
+        Friend WithEvents btnStudentRegister As University_hostel_mgt.Controls.GlassButton
         Friend WithEvents btnExitApp As University_hostel_mgt.Controls.GlassButton
     End Class
 End Namespace

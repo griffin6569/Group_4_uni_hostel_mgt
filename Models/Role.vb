@@ -15,6 +15,7 @@ Namespace Models
         Public Const AccommodationOfficer As String = "ACCOMMODATION_OFFICER"
         Public Const FinanceOfficer As String = "FINANCE_OFFICER"
         Public Const Viewer As String = "VIEWER"
+        Public Const Student As String = "STUDENT"
 
         Public Sub New()
         End Sub

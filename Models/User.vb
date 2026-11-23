@@ -13,6 +13,8 @@ Namespace Models
         Public Property RoleId As Integer
         Public Property RoleName As String = String.Empty
         Public Property RoleDescription As String = String.Empty
+        Public Property StudentId As Integer? = Nothing
+        Public Property RegistrationNumber As String = String.Empty
         Public Property AccountStatus As String = "ACTIVE"
         Public Property CreatedAt As DateTime = DateTime.UtcNow
         Public Property UpdatedAt As DateTime = DateTime.UtcNow
@@ -27,6 +29,12 @@ Namespace Models
         Public ReadOnly Property IsSuspended As Boolean
             Get
                 Return String.Equals(AccountStatus, "SUSPENDED", StringComparison.OrdinalIgnoreCase)
+            End Get
+        End Property
+
+        Public ReadOnly Property IsStudent As Boolean
+            Get
+                Return String.Equals(RoleName, Role.Student, StringComparison.OrdinalIgnoreCase)
             End Get
         End Property
 

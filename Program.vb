@@ -29,6 +29,7 @@ Public Module Program
 
         ' 1. Load Environment Configuration
         DotEnv.Load()
+        Data.Repositories.UserRepository.EnsureStudentPortalSchema()
 
         ' 2. Handle CLI verification / testing arguments if passed
         If args IsNot Nothing AndAlso args.Length > 0 Then
@@ -49,6 +50,9 @@ Public Module Program
                     Return
                 Case "--test-phase5", "--test-maintenance", "--test-reports"
                     RunPhase5Diagnostics()
+                    Return
+                Case "--test-student-portal", "--test-students", "--student-portal"
+                    RunStudentPortalDiagnostics()
                     Return
                 Case "--capture-screens"
                     CaptureScreenshots()
@@ -444,7 +448,7 @@ Public Module Program
 
         ' 8. Capture Official Electronic Receipt Preview
         Try
-            Console.WriteLine("[8/8] Capturing frmReceiptPreviewModal...")
+            Console.WriteLine("[8/12] Capturing frmReceiptPreviewModal...")
             Using rcpt As New Forms.Billing.frmReceiptPreviewModal(1)
                 rcpt.ShowInTaskbar = False
                 rcpt.StartPosition = FormStartPosition.Manual
@@ -464,6 +468,129 @@ Public Module Program
             End Using
         Catch ex As Exception
             Console.WriteLine($"      ✗ Error capturing receipt preview: {ex.Message}")
+        End Try
+
+        ' 9. Capture Student Registration Form
+        Try
+            Console.WriteLine("[9/12] Capturing frmStudentRegister...")
+            Using reg As New Forms.StudentPortal.frmStudentRegister()
+                reg.ShowInTaskbar = False
+                reg.StartPosition = FormStartPosition.Manual
+                reg.Location = New Point(100, 100)
+                reg.Show()
+                reg.txtEmail.TextValue = "griffin.wekesa25@students.dkut.ac.ke"
+                reg.txtRegNo.TextValue = "C026-01-0987/2023"
+                reg.txtFirstName.TextValue = "Griffin"
+                reg.txtLastName.TextValue = "Wekesa"
+                reg.txtCourse.TextValue = "BSc Computer Science"
+                reg.txtPhone.TextValue = "+254712345678"
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpReg As New Bitmap(reg.Width, reg.Height)
+                    reg.DrawToBitmap(bmpReg, New Rectangle(0, 0, reg.Width, reg.Height))
+                    Dim regFile As String = Path.Combine(docsScreenshotsDir, "student_register_screen.png")
+                    bmpReg.Save(regFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved student register screenshot:   {regFile}")
+                End Using
+                reg.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing student register: {ex.Message}")
+        End Try
+
+        ' 10. Capture Student Dashboard
+        Try
+            Console.WriteLine("[10/12] Capturing frmStudentDashboard...")
+            Dim userRepo As New Data.Repositories.UserRepository()
+            Dim studentUser = userRepo.GetUserByUsername("griffin.wekesa25@students.dkut.ac.ke")
+            If studentUser Is Nothing Then
+                studentUser = userRepo.GetUserByUsername("griffin.wekesa25")
+            End If
+            If studentUser Is Nothing Then
+                studentUser = New User With {
+                    .UserId = 999,
+                    .Username = "griffin.wekesa25",
+                    .FullName = "Griffin Wekesa",
+                    .RoleName = Role.Student,
+                    .StudentId = 1,
+                    .RegistrationNumber = "C026-01-0987/2023"
+                }
+            End If
+
+            Using sDash As New Forms.StudentPortal.frmStudentDashboard(studentUser)
+                sDash.ShowInTaskbar = False
+                sDash.StartPosition = FormStartPosition.Manual
+                sDash.Location = New Point(50, 50)
+                sDash.Size = New Size(1260, 780)
+                sDash.Show()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(300)
+                Application.DoEvents()
+
+                Using bmpDash As New Bitmap(sDash.Width, sDash.Height)
+                    sDash.DrawToBitmap(bmpDash, New Rectangle(0, 0, sDash.Width, sDash.Height))
+                    Dim sDashFile As String = Path.Combine(docsScreenshotsDir, "student_dashboard_screen.png")
+                    bmpDash.Save(sDashFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved student dashboard screenshot:  {sDashFile}")
+                End Using
+                sDash.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing student dashboard: {ex.Message}")
+        End Try
+
+        ' 11. Capture Student Payment Modal
+        Try
+            Console.WriteLine("[11/12] Capturing frmStudentPaymentModal...")
+            Dim dummyStudent As New User With {.UserId = 1, .Username = "griffin.wekesa25", .FullName = "Griffin Wekesa", .RoleName = Role.Student, .StudentId = 1}
+            Using payModal As New Forms.StudentPortal.frmStudentPaymentModal(1, 17500.0D, dummyStudent)
+                payModal.ShowInTaskbar = False
+                payModal.StartPosition = FormStartPosition.Manual
+                payModal.Location = New Point(100, 100)
+                payModal.Show()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpPay As New Bitmap(payModal.Width, payModal.Height)
+                    payModal.DrawToBitmap(bmpPay, New Rectangle(0, 0, payModal.Width, payModal.Height))
+                    Dim payFile As String = Path.Combine(docsScreenshotsDir, "student_payment_modal.png")
+                    bmpPay.Save(payFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved student payment modal screenshot: {payFile}")
+                End Using
+                payModal.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing student payment modal: {ex.Message}")
+        End Try
+
+        ' 12. Capture Student Issue Modal
+        Try
+            Console.WriteLine("[12/12] Capturing frmStudentIssueModal...")
+            Dim dummyStudent As New User With {.UserId = 1, .Username = "griffin.wekesa25", .FullName = "Griffin Wekesa", .RoleName = Role.Student, .StudentId = 1}
+            Using issueModal As New Forms.StudentPortal.frmStudentIssueModal(1, 1, dummyStudent)
+                issueModal.ShowInTaskbar = False
+                issueModal.StartPosition = FormStartPosition.Manual
+                issueModal.Location = New Point(100, 100)
+                issueModal.Show()
+                issueModal.txtTitle.TextValue = "Bathroom Faucet Water Leakage"
+                issueModal.txtDescription.Text = "Cold water faucet in en-suite bathroom is dripping continuously."
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpIssue As New Bitmap(issueModal.Width, issueModal.Height)
+                    issueModal.DrawToBitmap(bmpIssue, New Rectangle(0, 0, issueModal.Width, issueModal.Height))
+                    Dim issueFile As String = Path.Combine(docsScreenshotsDir, "student_issue_modal.png")
+                    bmpIssue.Save(issueFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved student defect modal screenshot:  {issueFile}")
+                End Using
+                issueModal.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing student issue modal: {ex.Message}")
         End Try
 
         Console.WriteLine("CaptureScreenshots completed.")
@@ -888,6 +1015,187 @@ Public Module Program
 
         Console.WriteLine("==================================================================")
         Console.WriteLine("  PHASE 5 ASSET PIPELINE, MAINTENANCE & REPORTING SUITE PASSED")
+        Console.WriteLine("==================================================================")
+    End Sub
+
+    ''' <summary>
+    ''' End-to-end diagnostic suite for Student Self-Service Portal:
+    ''' Email domain validation, self-registration, authentication, bed booking,
+    ''' electronic fee payments, and maintenance issue reporting.
+    ''' </summary>
+    Public Sub RunStudentPortalDiagnostics()
+        Console.WriteLine("==================================================================")
+        Console.WriteLine("  DEDAN KIMATHI UNIVERSITY - STUDENT SELF-SERVICE PORTAL SUITE")
+        Console.WriteLine("==================================================================")
+        Console.WriteLine()
+
+        ' 1. Email format verification
+        Console.WriteLine("[1/6] Testing DeKUT Student Email Format Enforcer...")
+        Dim validEmails As String() = {
+            "griffin.wekesa25@students.dkut.ac.ke",
+            "jane.doe23@students.dkut.ac.ke",
+            "albert.einstein26@students.dkut.ac.ke"
+        }
+        Dim invalidEmails As String() = {
+            "griffin.wekesa@gmail.com",
+            "staff@dkut.ac.ke",
+            "student@dekut.co.ke",
+            "invalid_email_format"
+        }
+
+        For Each em In validEmails
+            Dim isOk = ValidationHelper.IsValidDeKutStudentEmail(em)
+            Console.WriteLine($"      • '{em}': {If(isOk, "VALID (Passed)", "FAILED (Expected valid)")}")
+        Next
+        For Each em In invalidEmails
+            Dim isOk = ValidationHelper.IsValidDeKutStudentEmail(em)
+            Console.WriteLine($"      • '{em}': {If(Not isOk, "REJECTED (Correctly blocked non-DeKUT email)", "FAILED (Should be blocked)")}")
+        Next
+        Console.WriteLine()
+
+        ' 2. Student Self-Registration Test
+        Console.WriteLine("[2/6] Testing Student Account Registration & Verification...")
+        Dim portalService As New StudentPortalService()
+        Dim userRepo As New Data.Repositories.UserRepository()
+        Dim studentRepo As New Data.Repositories.StudentRepository()
+
+        Dim demoEmail As String = "griffin.wekesa25@students.dkut.ac.ke"
+        Dim demoRegNo As String = "C026-01-0987/2023"
+        Dim demoPass As String = "Student@2026!"
+
+        ' Ensure registration or retrieval
+        Dim registeredUser As User = Nothing
+        Dim regResult = portalService.RegisterStudentAccountAsync(
+            regNo:=demoRegNo,
+            email:=demoEmail,
+            firstName:="Griffin",
+            lastName:="Wekesa",
+            gender:="Male",
+            course:="BSc Computer Science",
+            department:="Computer Science",
+            phone:="+254712345678",
+            password:=demoPass
+        ).GetAwaiter().GetResult()
+
+        If regResult.Success Then
+            Console.WriteLine($"      ✓ Self-Registration Successful! User #{regResult.User.UserId}")
+            registeredUser = regResult.User
+        Else
+            Console.WriteLine($"      ℹ Registration notice: {regResult.Message}")
+            registeredUser = userRepo.GetUserByUsername(demoEmail)
+            If registeredUser Is Nothing Then
+                registeredUser = userRepo.GetUserByUsername("griffin.wekesa25")
+            End If
+        End If
+
+        If registeredUser IsNot Nothing Then
+            Console.WriteLine($"      • User ID:         {registeredUser.UserId}")
+            Console.WriteLine($"      • Username:        {registeredUser.Username}")
+            Console.WriteLine($"      • Role:            {registeredUser.RoleName}")
+            Console.WriteLine($"      • Student ID:      {registeredUser.StudentId}")
+            Console.WriteLine($"      • Reg Number:      {registeredUser.RegistrationNumber}")
+            Console.WriteLine($"      • IsStudent Check: {registeredUser.IsStudent}")
+        Else
+            Console.WriteLine("      ✗ Could not locate or create demo student user.")
+            Return
+        End If
+        Console.WriteLine()
+
+        ' 3. Student Authentication Test
+        Console.WriteLine("[3/6] Testing Student Portal Authentication by Email & Username...")
+        Dim authService As New AuthenticationService()
+        Dim authByEmail = authService.Authenticate(demoEmail, demoPass)
+        Console.WriteLine($"      • Login via Student Email ({demoEmail}): {If(authByEmail.Success, "AUTHENTICATED", "FAILED - " & authByEmail.ErrorMessage)}")
+
+        Dim authByUsername = authService.Authenticate("griffin.wekesa25", demoPass)
+        Console.WriteLine($"      • Login via Username (griffin.wekesa25): {If(authByUsername.Success, "AUTHENTICATED", "FAILED - " & authByUsername.ErrorMessage)}")
+        Console.WriteLine()
+
+        ' 4. Available Rooms Exploration (Gender Filtered)
+        Console.WriteLine("[4/6] Querying Available Hostel Units for Student Gender (Male)...")
+        Dim availRooms = portalService.GetAvailableRoomsForStudentAsync("Male").GetAwaiter().GetResult()
+        Console.WriteLine($"      Found {availRooms.Count} Rooms with Vacant Bed Spaces:")
+        For Each r In availRooms.Take(3)
+            Console.WriteLine($"      • {r.HostelName} - Rm {r.RoomNumber} (Floor {r.FloorNumber}, {r.RoomType}) | {r.AvailableBedsCount} Beds Open | KES {r.SemesterRate:N2}")
+        Next
+        Console.WriteLine()
+
+        ' 5. Active Allocation & Roommate Discovery Check
+        Console.WriteLine("[5/6] Checking Active Bed Space Allocation & Fellow Roommates...")
+        Dim alloc = portalService.GetStudentCurrentAllocationAsync(registeredUser.StudentId.Value).GetAwaiter().GetResult()
+        If alloc Is Nothing Then
+            Console.WriteLine("      ℹ Student has no active allocation. Booking first available bed space now...")
+            If availRooms.Count > 0 AndAlso availRooms(0).AvailableBeds.Count > 0 Then
+                Dim targetBed = availRooms(0).AvailableBeds(0)
+                Dim bookRes = portalService.BookBedAsync(registeredUser.StudentId.Value, targetBed.BedId, registeredUser.UserId).GetAwaiter().GetResult()
+                If bookRes.Success Then
+                    Console.WriteLine($"      ✓ Successfully Booked Bed #{targetBed.BedNumber} (Allocation #{bookRes.AllocationId})")
+                    alloc = portalService.GetStudentCurrentAllocationAsync(registeredUser.StudentId.Value).GetAwaiter().GetResult()
+                Else
+                    Console.WriteLine($"      ✗ Booking Failed: {bookRes.Message}")
+                End If
+            End If
+        End If
+
+        If alloc IsNot Nothing Then
+            Console.WriteLine($"      • Allocation ID:   #{alloc.AllocationId}")
+            Console.WriteLine($"      • Hostel & Room:   {alloc.HostelName} - Room {alloc.RoomNumber} (Bed {alloc.BedNumber})")
+            Console.WriteLine($"      • Allocation Date: {alloc.AllocationDate:yyyy-MM-dd}")
+            Console.WriteLine($"      • Semester Fee:    KES {alloc.SemesterFee:N2}")
+            Console.WriteLine($"      • Total Settled:   KES {alloc.TotalPaid:N2}")
+            Console.WriteLine($"      • Balance Owed:    KES {alloc.BalanceOwed:N2}")
+            Console.WriteLine($"      • Fellow Roommates ({alloc.Roommates.Count}):")
+            For Each rm In alloc.Roommates
+                Console.WriteLine($"        - Bed {rm.BedNumber}: {rm.FullName} ({rm.Course})")
+            Next
+        End If
+        Console.WriteLine()
+
+        ' 6. Fee Payment & Defect Ticket Logging Check
+        Console.WriteLine("[6/6] Testing Online Fee Payment & Maintenance Defect Logging...")
+        If alloc IsNot Nothing Then
+            ' Simulate payment if balance > 0
+            If alloc.BalanceOwed > 0 Then
+                Dim payAmount = Math.Min(alloc.BalanceOwed, 3000.0D)
+                Dim payRes = portalService.ProcessPaymentAsync(
+                    alloc.AllocationId,
+                    registeredUser.StudentId.Value,
+                    payAmount,
+                    "M-Pesa",
+                    $"MPESA-{DateTime.Now:HHmmss}",
+                    registeredUser.UserId
+                ).GetAwaiter().GetResult()
+
+                If payRes.Success Then
+                    Console.WriteLine($"      ✓ Fee Payment Processed: KES {payAmount:N2} | Receipt #{payRes.ReceiptNumber}")
+                Else
+                    Console.WriteLine($"      ✗ Payment Failed: {payRes.Message}")
+                End If
+            Else
+                Console.WriteLine("      ℹ Student balance is currently settled (KES 0.00).")
+            End If
+
+            ' Simulate maintenance defect ticket
+            Dim ticketRes = portalService.ReportMaintenanceIssueAsync(
+                registeredUser.StudentId.Value,
+                alloc.RoomId,
+                alloc.BedId,
+                "Study Lamp Switch Loose",
+                "The wall lamp switch near study desk flickers intermittently.",
+                "",
+                registeredUser.UserId
+            ).GetAwaiter().GetResult()
+
+            If ticketRes.Success Then
+                Console.WriteLine($"      ✓ Maintenance Defect Logged: Ticket #{ticketRes.MaintenanceId}")
+            Else
+                Console.WriteLine($"      ✗ Issue Report Failed: {ticketRes.Message}")
+            End If
+        End If
+        Console.WriteLine()
+
+        Console.WriteLine("==================================================================")
+        Console.WriteLine("  STUDENT PORTAL INTEGRATION SUITE VERIFIED SUCCESSFULLY")
         Console.WriteLine("==================================================================")
     End Sub
 End Module

@@ -26,18 +26,24 @@ Namespace Data.Repositories
                     u.email,
                     u.password_hash,
                     u.role_id,
+                    u.student_id,
                     u.account_status,
                     u.created_at,
                     u.updated_at,
                     u.last_login,
                     r.role_name,
-                    r.description AS role_description
+                    r.description AS role_description,
+                    s.registration_number
                 FROM dbo.users u
                 INNER JOIN dbo.roles r ON u.role_id = r.role_id
-                WHERE u.username = @Username;"
+                LEFT JOIN dbo.students s ON u.student_id = s.student_id
+                WHERE u.username = @Identifier 
+                   OR u.email = @Identifier
+                   OR s.registration_number = @Identifier
+                   OR u.email = @Identifier + '@students.dkut.ac.ke';"
 
             Dim params As SqlParameter() = {
-                DatabaseConnection.CreateParam("@Username", username.Trim(), SqlDbType.NVarChar)
+                DatabaseConnection.CreateParam("@Identifier", username.Trim(), SqlDbType.NVarChar)
             }
 
             Dim dt As DataTable = DatabaseConnection.ExecuteDataTable(query, params)
@@ -255,7 +261,69 @@ Namespace Data.Repositories
             End If
             u.RoleName = row("role_name").ToString()
             u.RoleDescription = If(IsDBNull(row("role_description")), String.Empty, row("role_description").ToString())
+
+            If row.Table.Columns.Contains("student_id") AndAlso Not IsDBNull(row("student_id")) Then
+                u.StudentId = Convert.ToInt32(row("student_id"))
+            End If
+            If row.Table.Columns.Contains("registration_number") AndAlso Not IsDBNull(row("registration_number")) Then
+                u.RegistrationNumber = row("registration_number").ToString()
+            End If
+
             Return u
+        End Function
+
+        ''' <summary>
+        ''' Ensures database has STUDENT role and student_id column for self-service portal.
+        ''' </summary>
+        Public Shared Sub EnsureStudentPortalSchema()
+            Try
+                Const roleSql As String = "
+                    IF NOT EXISTS (SELECT 1 FROM dbo.roles WHERE role_name = 'STUDENT')
+                    BEGIN
+                        INSERT INTO dbo.roles (role_name, description)
+                        VALUES ('STUDENT', 'Enrolled Dedan Kimathi University student with access to self-service accommodation portal');
+                    END;"
+                DatabaseConnection.ExecuteNonQuery(roleSql)
+
+                Const colSql As String = "
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.users') AND name = 'student_id')
+                    BEGIN
+                        ALTER TABLE dbo.users ADD student_id INT NULL;
+                        ALTER TABLE dbo.users ADD CONSTRAINT FK_users_student FOREIGN KEY (student_id) REFERENCES dbo.students(student_id);
+                        CREATE NONCLUSTERED INDEX IX_users_student_id ON dbo.users(student_id);
+                    END;"
+                DatabaseConnection.ExecuteNonQuery(colSql)
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine($"EnsureStudentPortalSchema: {ex.Message}")
+            End Try
+        End Sub
+
+        ''' <summary>
+        ''' Creates a student user account linked to their student roster record.
+        ''' </summary>
+        Public Function CreateStudentUser(fullName As String, username As String, email As String, passwordHash As String, studentId As Integer) As User
+            EnsureStudentPortalSchema()
+
+            Const getRoleIdSql As String = "SELECT role_id FROM dbo.roles WHERE role_name = 'STUDENT';"
+            Dim roleObj = DatabaseConnection.ExecuteScalar(getRoleIdSql)
+            Dim roleId As Integer = If(roleObj IsNot Nothing AndAlso Not IsDBNull(roleObj), Convert.ToInt32(roleObj), 6)
+
+            Const insertSql As String = "
+                INSERT INTO dbo.users (full_name, username, email, password_hash, role_id, student_id, account_status, created_at, updated_at)
+                OUTPUT INSERTED.user_id
+                VALUES (@FullName, @Username, @Email, @PasswordHash, @RoleId, @StudentId, 'ACTIVE', SYSUTCDATETIME(), SYSUTCDATETIME());"
+
+            Dim params As SqlParameter() = {
+                DatabaseConnection.CreateParam("@FullName", fullName.Trim(), SqlDbType.NVarChar),
+                DatabaseConnection.CreateParam("@Username", username.Trim(), SqlDbType.NVarChar),
+                DatabaseConnection.CreateParam("@Email", email.Trim().ToLowerInvariant(), SqlDbType.NVarChar),
+                DatabaseConnection.CreateParam("@PasswordHash", passwordHash, SqlDbType.NVarChar),
+                DatabaseConnection.CreateParam("@RoleId", roleId, SqlDbType.Int),
+                DatabaseConnection.CreateParam("@StudentId", studentId, SqlDbType.Int)
+            }
+
+            DatabaseConnection.ExecuteScalar(insertSql, params)
+            Return GetUserByUsername(username)
         End Function
     End Class
 End Namespace

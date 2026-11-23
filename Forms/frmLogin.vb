@@ -108,7 +108,24 @@ Namespace Forms
                 Return False
             End If
 
-            ' Success State
+            ' Success State - Role-Based Routing
+            If result.User.IsStudent Then
+                ShowStatus($"✓ Authenticated! Welcome, {result.User.FullName}...", ThemeManager.EmeraldPrimary)
+                Await Task.Delay(350)
+
+                Me.Hide()
+                Using studentPortal As New Forms.StudentPortal.frmStudentDashboard(result.User)
+                    studentPortal.ShowDialog()
+                End Using
+
+                txtPassword.TextValue = String.Empty
+                txtPassword.Focus()
+                ShowStatus("Signed out from student portal.", ThemeManager.TextSecondary)
+                Me.Show()
+                Return True
+            End If
+
+            ' Staff Dashboard Route
             ShowStatus($"✓ Authenticated! Launching Dashboard...", ThemeManager.EmeraldPrimary)
             Await Task.Delay(350)
 
@@ -126,8 +143,20 @@ Namespace Forms
             Return True
         End Function
 
+        Private Sub btnStudentRegister_Click(sender As Object, e As EventArgs) Handles btnStudentRegister.Click
+            Using reg As New Forms.StudentPortal.frmStudentRegister()
+                If reg.ShowDialog(Me) = DialogResult.OK AndAlso reg.RegisteredUser IsNot Nothing Then
+                    txtUsername.TextValue = reg.RegisteredUser.Email
+                    txtPassword.TextValue = String.Empty
+                    txtPassword.Focus()
+                    ShowStatus("✓ Account created! Please enter your password to sign in.", ThemeManager.EmeraldPrimary)
+                End If
+            End Using
+        End Sub
+
         Private Sub SetLoadingState(isLoading As Boolean)
             btnLogin.Enabled = Not isLoading
+            btnStudentRegister.Enabled = Not isLoading
             btnExitApp.Enabled = Not isLoading
             txtUsername.Enabled = Not isLoading
             txtPassword.Enabled = Not isLoading

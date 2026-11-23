@@ -89,6 +89,40 @@ Namespace Data.Repositories
             Return Nothing
         End Function
 
+        Public Function GetStudentByRegistrationNumber(regNo As String) As Student
+            If String.IsNullOrWhiteSpace(regNo) Then Return Nothing
+            Dim sql As String =
+                "SELECT s.student_id, s.registration_number, s.first_name, s.middle_name, s.last_name, " &
+                "       s.gender, s.email, s.phone_number, s.course, s.department, s.academic_year, " &
+                "       s.emergency_contact_name, s.emergency_contact_phone, s.student_status, " &
+                "       s.created_at, s.updated_at, " &
+                "       0 AS has_active_allocation, '' AS bed_identifier, 0.00 AS total_balance " &
+                "FROM dbo.students s WHERE s.registration_number = @regNo;"
+
+            Dim dt As DataTable = DatabaseConnection.ExecuteDataTable(sql, {DatabaseConnection.CreateParam("@regNo", regNo.Trim(), SqlDbType.NVarChar)})
+            If dt.Rows.Count > 0 Then
+                Return MapStudentFromRow(dt.Rows(0))
+            End If
+            Return Nothing
+        End Function
+
+        Public Function GetStudentByEmail(email As String) As Student
+            If String.IsNullOrWhiteSpace(email) Then Return Nothing
+            Dim sql As String =
+                "SELECT s.student_id, s.registration_number, s.first_name, s.middle_name, s.last_name, " &
+                "       s.gender, s.email, s.phone_number, s.course, s.department, s.academic_year, " &
+                "       s.emergency_contact_name, s.emergency_contact_phone, s.student_status, " &
+                "       s.created_at, s.updated_at, " &
+                "       0 AS has_active_allocation, '' AS bed_identifier, 0.00 AS total_balance " &
+                "FROM dbo.students s WHERE s.email = @email;"
+
+            Dim dt As DataTable = DatabaseConnection.ExecuteDataTable(sql, {DatabaseConnection.CreateParam("@email", email.Trim().ToLowerInvariant(), SqlDbType.NVarChar)})
+            If dt.Rows.Count > 0 Then
+                Return MapStudentFromRow(dt.Rows(0))
+            End If
+            Return Nothing
+        End Function
+
         Public Function CreateStudent(student As Student) As (Success As Boolean, Message As String, StudentId As Integer)
             ' Registration number uniqueness check
             Dim checkRegSql As String = "SELECT COUNT(*) FROM dbo.students WHERE registration_number = @regNo;"
