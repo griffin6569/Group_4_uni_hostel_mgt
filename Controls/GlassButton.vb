@@ -88,6 +88,50 @@ Namespace Controls
             End Set
         End Property
 
+        ''' <summary>
+        ''' Configures primary frosted cyan/navy action button style.
+        ''' </summary>
+        Public Sub SetPrimaryStyle()
+            _primaryColor = Color.FromArgb(30, 62, 98)
+            _hoverColor = Color.FromArgb(44, 82, 130)
+            _pressedColor = Color.FromArgb(20, 45, 75)
+            _textColor = Color.White
+            Me.Invalidate()
+        End Sub
+
+        ''' <summary>
+        ''' Configures secondary translucent frosted outline button style.
+        ''' </summary>
+        Public Sub SetSecondaryStyle()
+            _primaryColor = Color.FromArgb(30, 255, 255, 255)
+            _hoverColor = Color.FromArgb(50, 255, 255, 255)
+            _pressedColor = Color.FromArgb(20, 255, 255, 255)
+            _textColor = Color.FromArgb(226, 232, 240)
+            Me.Invalidate()
+        End Sub
+
+        ''' <summary>
+        ''' Configures glowing emerald success button style.
+        ''' </summary>
+        Public Sub SetSuccessStyle()
+            _primaryColor = Color.FromArgb(16, 185, 129)
+            _hoverColor = Color.FromArgb(34, 197, 94)
+            _pressedColor = Color.FromArgb(5, 150, 105)
+            _textColor = Color.White
+            Me.Invalidate()
+        End Sub
+
+        ''' <summary>
+        ''' Configures glowing danger coral button style.
+        ''' </summary>
+        Public Sub SetDangerStyle()
+            _primaryColor = Color.FromArgb(220, 38, 38)
+            _hoverColor = Color.FromArgb(239, 68, 68)
+            _pressedColor = Color.FromArgb(185, 28, 28)
+            _textColor = Color.White
+            Me.Invalidate()
+        End Sub
+
         Protected Overrides Sub OnMouseEnter(e As EventArgs)
             MyBase.OnMouseEnter(e)
             _isHovered = True

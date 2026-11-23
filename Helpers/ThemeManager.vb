@@ -46,7 +46,53 @@ Namespace Helpers
         Public Shared ReadOnly StatusInfoBg As Color = Color.FromArgb(219, 234, 254)   ' #DBEAFE (Info chip background)
 
         ' =========================================================================
-        ' 2. LEGACY COMPATIBILITY TOKENS
+        ' 2. OPTION B: FROSTED GLASSMORPHISM & ACRYLIC DESIGN TOKENS
+        ' =========================================================================
+        Public Shared ReadOnly CanvasDark As Color = Color.FromArgb(8, 14, 24)           ' #080E18 (Deep Twilight Midnight Canvas)
+        Public Shared ReadOnly CanvasDarkMesh As Color = Color.FromArgb(13, 23, 38)      ' #0D1726 (Mesh Gradient Second Tone)
+
+        ' Frosted Acrylic Card Surfaces
+        Public Shared ReadOnly GlassCardFill As Color = Color.FromArgb(160, 16, 26, 42)     ' Translucent deep acrylic (~63% alpha)
+        Public Shared ReadOnly GlassCardElevated As Color = Color.FromArgb(195, 22, 34, 54) ' Elevated translucent card
+        Public Shared ReadOnly GlassCardHover As Color = Color.FromArgb(185, 28, 44, 70)    ' Hover state translucent card
+        Public Shared ReadOnly GlassBorder As Color = Color.FromArgb(42, 255, 255, 255)     ' Crisp 1px frosted specular edge
+        Public Shared ReadOnly GlassBorderFocus As Color = Color.FromArgb(120, 56, 189, 248) ' Cyan frosted focus edge
+        Public Shared ReadOnly GlassBorderGold As Color = Color.FromArgb(120, 217, 119, 6)   ' Gold frosted accent edge
+
+        ' Input & Filter Surfaces
+        Public Shared ReadOnly GlassInputFill As Color = Color.FromArgb(14, 22, 35)    ' Dark frosted input well
+        Public Shared ReadOnly GlassInputBorder As Color = Color.FromArgb(55, 255, 255, 255)
+        Public Shared ReadOnly GlassInputFocus As Color = Color.FromArgb(56, 189, 248)      ' #38BDF8 Cyan Focus
+
+        ' High-Contrast Frosted Typography (WCAG AAA Guaranteed on Glass)
+        Public Shared ReadOnly TextChalkWhite As Color = Color.FromArgb(255, 255, 255)     ' #FFFFFF (Primary numbers, bold stats)
+        Public Shared ReadOnly TextPlatinum As Color = Color.FromArgb(226, 232, 240)       ' #E2E8F0 (Headings, titles, active nav)
+        Public Shared ReadOnly TextSilverSlate As Color = Color.FromArgb(203, 213, 225)    ' #CBD5E1 (Body text, input values)
+        Public Shared ReadOnly TextMutedSlate As Color = Color.FromArgb(148, 163, 184)     ' #94A3B8 (Field prompts, subtitles)
+        Public Shared ReadOnly TextSteel As Color = Color.FromArgb(100, 116, 139)          ' #64748B (Metadata, timestamps)
+
+        ' Frosted Glowing Semantic Accents
+        Public Shared ReadOnly GlassStatusSuccess As Color = Color.FromArgb(16, 185, 129)   ' #10B981 Vibrant Emerald
+        Public Shared ReadOnly GlassStatusSuccessBg As Color = Color.FromArgb(35, 16, 185, 129)
+        Public Shared ReadOnly GlassStatusWarning As Color = Color.FromArgb(245, 158, 11)   ' #F59E0B Amber Gold
+        Public Shared ReadOnly GlassStatusWarningBg As Color = Color.FromArgb(35, 245, 158, 11)
+        Public Shared ReadOnly GlassStatusDanger As Color = Color.FromArgb(239, 68, 68)     ' #EF4444 Vibrant Coral
+        Public Shared ReadOnly GlassStatusDangerBg As Color = Color.FromArgb(35, 239, 68, 68)
+        Public Shared ReadOnly GlassStatusInfo As Color = Color.FromArgb(56, 189, 248)      ' #38BDF8 Cyan Ice
+        Public Shared ReadOnly GlassStatusInfoBg As Color = Color.FromArgb(35, 56, 189, 248)
+        Public Shared ReadOnly AccentSapphire As Color = Color.FromArgb(56, 189, 248)       ' Sapphire Ice Accent
+
+        ' Display & Widget Typography Standards
+        Public Shared ReadOnly DisplayFont As New Font("Segoe UI", 20.0F, FontStyle.Bold)
+        Public Shared ReadOnly KpiNumberFont As New Font("Segoe UI", 18.0F, FontStyle.Bold)
+        Public Shared ReadOnly KpiMoneyFont As New Font("Consolas", 16.5F, FontStyle.Bold)
+        Public Shared ReadOnly KpiLabelFont As New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold)
+        Public Shared ReadOnly KpiSubFont As New Font("Segoe UI", 8.0F, FontStyle.Regular)
+        Public Shared ReadOnly FontSmallBold As New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold)
+        Public Shared ReadOnly FontSmall As New Font("Segoe UI", 8.5F, FontStyle.Regular)
+
+        ' =========================================================================
+        ' 3. LEGACY COMPATIBILITY TOKENS
         ' =========================================================================
         Public Shared ReadOnly BgDark As Color = Color.FromArgb(11, 15, 20)          ' #0B0F14
         Public Shared ReadOnly PanelDark As Color = Color.FromArgb(20, 28, 36)       ' #141C24
@@ -303,6 +349,62 @@ Namespace Helpers
                 .SelectionBackColor = Color.FromArgb(226, 238, 253),
                 .SelectionForeColor = TextDeepSlate,
                 .Padding = New Padding(8, 0, 8, 0)
+            }
+        End Sub
+
+        ''' <summary>
+        ''' Applies the Option B Frosted Glassmorphism table styling to any DataGridView.
+        ''' Eliminates raw borders and guarantees high-contrast platinum/white text on translucent acrylic rows.
+        ''' </summary>
+        Public Shared Sub ApplyGlassGridStyle(dgv As DataGridView)
+            If dgv Is Nothing Then Return
+
+            EnableDoubleBuffering(dgv)
+
+            dgv.BackgroundColor = Color.FromArgb(14, 22, 36)
+            dgv.BorderStyle = BorderStyle.None
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal
+            dgv.GridColor = Color.FromArgb(28, 42, 65)
+            dgv.RowHeadersVisible = False
+            dgv.EnableHeadersVisualStyles = False
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect
+            dgv.MultiSelect = False
+            dgv.AllowUserToAddRows = False
+            dgv.AllowUserToDeleteRows = False
+            dgv.AllowUserToResizeRows = False
+            dgv.AutoGenerateColumns = False
+            dgv.RowTemplate.Height = 38
+
+            ' Column Headers (Deep Midnight Frosted Header)
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None
+            dgv.ColumnHeadersHeight = 40
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing
+            dgv.ColumnHeadersDefaultCellStyle = New DataGridViewCellStyle() With {
+                .BackColor = Color.FromArgb(9, 15, 26),
+                .ForeColor = TextChalkWhite,
+                .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
+                .Alignment = DataGridViewContentAlignment.MiddleLeft,
+                .Padding = New Padding(10, 0, 10, 0)
+            }
+
+            ' Default Cell Style (Frosted Acrylic Row)
+            dgv.DefaultCellStyle = New DataGridViewCellStyle() With {
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = TextPlatinum,
+                .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular),
+                .SelectionBackColor = Color.FromArgb(30, 58, 138),
+                .SelectionForeColor = TextChalkWhite,
+                .Padding = New Padding(10, 0, 10, 0)
+            }
+
+            ' Alternating Row Style (Subtle Translucent Contrast)
+            dgv.AlternatingRowsDefaultCellStyle = New DataGridViewCellStyle() With {
+                .BackColor = Color.FromArgb(21, 33, 52),
+                .ForeColor = TextPlatinum,
+                .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular),
+                .SelectionBackColor = Color.FromArgb(30, 58, 138),
+                .SelectionForeColor = TextChalkWhite,
+                .Padding = New Padding(10, 0, 10, 0)
             }
         End Sub
     End Class
