@@ -28,3 +28,4 @@ Namespace Models
         Public Property RecordedByName As String = String.Empty
     End Class
 End Namespace
+

@@ -28,8 +28,9 @@ Namespace Forms
         Private _viewBeds As BedsControl
         Private _viewAllocations As AllocationsControl
         Private _viewBilling As BillingControl
-        Private _viewReports As PlaceholderControl
-        Private _viewUsers As PlaceholderControl
+        Private _viewMaintenance As MaintenanceControl
+        Private _viewReports As ReportsControl
+        Private _viewUsers As UsersControl
 
         Private Structure SemesterItem
             Public Property Id As Integer
@@ -124,25 +125,14 @@ Namespace Forms
             ' 7. Billing View (Phase 4 Live Module)
             _viewBilling = New BillingControl(_currentUser.UserId)
 
-            ' 8. Placeholders for upcoming Phase 5
-            _viewReports = New PlaceholderControl(
-                "Phase 5 — Reporting & Analytics",
-                "Executive Accommodation & Financial Reports",
-                "Exportable PDF and structured reports for university councils, registrars, and bursars.",
-                "• Hostel Occupancy & Vacancy Breakdown Reports." & vbCrLf &
-                "• Semester Revenue & Arrears Aging Schedules." & vbCrLf &
-                "• Maintenance Incidence & Bed Downtime Analytics." & vbCrLf &
-                "• Student Accommodation History & Clearance Certificates."
-            )
+            ' 8. Maintenance View (Phase 5 Live Module)
+            _viewMaintenance = New MaintenanceControl(_currentUser.UserId)
 
-            _viewUsers = New PlaceholderControl(
-                "Phase 5 — System Administration",
-                "Staff Role-Based Access Control & User Administration",
-                "Manage university accommodation and bursary staff credentials, roles, and security policies.",
-                "• PBKDF2 Password Hashing with unique cryptographically random salts." & vbCrLf &
-                "• Granular RBAC permissions: SUPER_ADMIN, ADMIN, ACCOMMODATION_OFFICER, FINANCE_OFFICER." & vbCrLf &
-                "• Complete Activity Audit Trails capturing logins, allocations, rate changes, and refunds."
-            )
+            ' 9. Reports View (Phase 5 Live Module)
+            _viewReports = New ReportsControl()
+
+            ' 10. System Users & RBAC View (Phase 5 Live Module)
+            _viewUsers = New UsersControl(_currentUser.UserId)
 
             ' Add all views to pnlContentHost
             pnlContentHost.Controls.AddRange({
@@ -153,6 +143,7 @@ Namespace Forms
                 _viewBeds,
                 _viewAllocations,
                 _viewBilling,
+                _viewMaintenance,
                 _viewReports,
                 _viewUsers
             })
@@ -211,6 +202,7 @@ Namespace Forms
             _viewBeds.Visible = False
             _viewAllocations.Visible = False
             _viewBilling.Visible = False
+            _viewMaintenance.Visible = False
             _viewReports.Visible = False
             _viewUsers.Visible = False
 
@@ -264,17 +256,26 @@ Namespace Forms
                     _viewBilling.BringToFront()
                     _viewBilling.LoadBillingData()
 
+                Case "MAINTENANCE"
+                    lblViewTitle.Text = "Hostel Maintenance & Facility Desk"
+                    lblViewSub.Text = "Incident Defect Tracking, Evidence Photographs & Bed Space Locking"
+                    _viewMaintenance.Visible = True
+                    _viewMaintenance.BringToFront()
+                    _viewMaintenance.LoadMaintenanceData()
+
                 Case "REPORTS"
                     lblViewTitle.Text = "Institutional Reports & Analytics"
-                    lblViewSub.Text = "Phase 5 — Occupancy Schedules, Arrears Aging & Audits"
+                    lblViewSub.Text = "Official Room Occupancy Matrices, Allocation Schedules & Defaulters Audits"
                     _viewReports.Visible = True
                     _viewReports.BringToFront()
+                    _viewReports.LoadActiveReportData()
 
                 Case "USERS"
-                    lblViewTitle.Text = "System User Administration"
-                    lblViewSub.Text = "Phase 5 — Staff Accounts, Security Roles & Audit Trails"
+                    lblViewTitle.Text = "System User Administration & RBAC"
+                    lblViewSub.Text = "Staff Accounts, PBKDF2 Password Vault & Activity Audit Trail"
                     _viewUsers.Visible = True
                     _viewUsers.BringToFront()
+                    _viewUsers.LoadUsersData()
             End Select
 
             If postNavAction IsNot Nothing Then
@@ -297,6 +298,12 @@ Namespace Forms
                 _viewAllocations.LoadAllocationsData()
             ElseIf _viewBilling.Visible Then
                 _viewBilling.LoadBillingData()
+            ElseIf _viewMaintenance.Visible Then
+                _viewMaintenance.LoadMaintenanceData()
+            ElseIf _viewReports.Visible Then
+                _viewReports.LoadActiveReportData()
+            ElseIf _viewUsers.Visible Then
+                _viewUsers.LoadUsersData()
             End If
         End Sub
 
@@ -329,6 +336,10 @@ Namespace Forms
 
         Private Sub btnNavBilling_Click(sender As Object, e As EventArgs) Handles btnNavBilling.Click
             SwitchView("BILLING", btnNavBilling)
+        End Sub
+
+        Private Sub btnNavMaintenance_Click(sender As Object, e As EventArgs) Handles btnNavMaintenance.Click
+            SwitchView("MAINTENANCE", btnNavMaintenance)
         End Sub
 
         Private Sub btnNavReports_Click(sender As Object, e As EventArgs) Handles btnNavReports.Click

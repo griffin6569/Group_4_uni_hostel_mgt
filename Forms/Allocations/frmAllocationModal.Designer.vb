@@ -379,3 +379,4 @@ Namespace Forms.Allocations
         Friend WithEvents btnAllocate As System.Windows.Forms.Button
     End Class
 End Namespace
+

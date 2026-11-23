@@ -385,3 +385,4 @@ Namespace Forms.Allocations
         Friend WithEvents btnExecuteTransfer As System.Windows.Forms.Button
     End Class
 End Namespace
+

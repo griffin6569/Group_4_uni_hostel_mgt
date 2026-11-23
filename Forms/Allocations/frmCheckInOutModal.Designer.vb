@@ -319,3 +319,4 @@ Namespace Forms.Allocations
         Friend WithEvents btnConfirm As System.Windows.Forms.Button
     End Class
 End Namespace
+

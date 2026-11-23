@@ -22,6 +22,7 @@ Namespace Forms
             Me.pnlNavMenu = New System.Windows.Forms.Panel()
             Me.btnNavUsers = New System.Windows.Forms.Button()
             Me.btnNavReports = New System.Windows.Forms.Button()
+            Me.btnNavMaintenance = New System.Windows.Forms.Button()
             Me.btnNavBilling = New System.Windows.Forms.Button()
             Me.btnNavAllocations = New System.Windows.Forms.Button()
             Me.btnNavBeds = New System.Windows.Forms.Button()
@@ -183,6 +184,7 @@ Namespace Forms
             Me.pnlNavMenu.AutoScroll = True
             Me.pnlNavMenu.Controls.Add(Me.btnNavUsers)
             Me.pnlNavMenu.Controls.Add(Me.btnNavReports)
+            Me.pnlNavMenu.Controls.Add(Me.btnNavMaintenance)
             Me.pnlNavMenu.Controls.Add(Me.btnNavBilling)
             Me.pnlNavMenu.Controls.Add(Me.btnNavAllocations)
             Me.pnlNavMenu.Controls.Add(Me.btnNavBeds)
@@ -318,6 +320,24 @@ Namespace Forms
             Me.btnNavBilling.UseVisualStyleBackColor = False
             Me.btnNavBilling.UseMnemonic = False
             '
+            'btnNavMaintenance
+            '
+            Me.btnNavMaintenance.BackColor = System.Drawing.Color.Transparent
+            Me.btnNavMaintenance.Dock = System.Windows.Forms.DockStyle.Top
+            Me.btnNavMaintenance.FlatAppearance.BorderSize = 0
+            Me.btnNavMaintenance.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+            Me.btnNavMaintenance.Font = New System.Drawing.Font("Segoe UI", 9.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
+            Me.btnNavMaintenance.ForeColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
+            Me.btnNavMaintenance.Location = New System.Drawing.Point(0, 316)
+            Me.btnNavMaintenance.Name = "btnNavMaintenance"
+            Me.btnNavMaintenance.Padding = New System.Windows.Forms.Padding(20, 0, 0, 0)
+            Me.btnNavMaintenance.Size = New System.Drawing.Size(250, 44)
+            Me.btnNavMaintenance.TabIndex = 7
+            Me.btnNavMaintenance.Text = "🔧  Maintenance Desk"
+            Me.btnNavMaintenance.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+            Me.btnNavMaintenance.UseVisualStyleBackColor = False
+            Me.btnNavMaintenance.UseMnemonic = False
+            '
             'btnNavReports
             '
             Me.btnNavReports.BackColor = System.Drawing.Color.Transparent
@@ -326,11 +346,11 @@ Namespace Forms
             Me.btnNavReports.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnNavReports.Font = New System.Drawing.Font("Segoe UI", 9.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnNavReports.ForeColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
-            Me.btnNavReports.Location = New System.Drawing.Point(0, 316)
+            Me.btnNavReports.Location = New System.Drawing.Point(0, 360)
             Me.btnNavReports.Name = "btnNavReports"
             Me.btnNavReports.Padding = New System.Windows.Forms.Padding(20, 0, 0, 0)
             Me.btnNavReports.Size = New System.Drawing.Size(250, 44)
-            Me.btnNavReports.TabIndex = 7
+            Me.btnNavReports.TabIndex = 8
             Me.btnNavReports.Text = "📈  Reports & Analytics"
             Me.btnNavReports.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             Me.btnNavReports.UseVisualStyleBackColor = False
@@ -344,11 +364,11 @@ Namespace Forms
             Me.btnNavUsers.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnNavUsers.Font = New System.Drawing.Font("Segoe UI", 9.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnNavUsers.ForeColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
-            Me.btnNavUsers.Location = New System.Drawing.Point(0, 360)
+            Me.btnNavUsers.Location = New System.Drawing.Point(0, 404)
             Me.btnNavUsers.Name = "btnNavUsers"
             Me.btnNavUsers.Padding = New System.Windows.Forms.Padding(20, 0, 0, 0)
             Me.btnNavUsers.Size = New System.Drawing.Size(250, 44)
-            Me.btnNavUsers.TabIndex = 8
+            Me.btnNavUsers.TabIndex = 9
             Me.btnNavUsers.Text = "⚙️  User Administration"
             Me.btnNavUsers.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             Me.btnNavUsers.UseVisualStyleBackColor = False
@@ -565,6 +585,7 @@ Namespace Forms
         Friend WithEvents btnNavBeds As System.Windows.Forms.Button
         Friend WithEvents btnNavAllocations As System.Windows.Forms.Button
         Friend WithEvents btnNavBilling As System.Windows.Forms.Button
+        Friend WithEvents btnNavMaintenance As System.Windows.Forms.Button
         Friend WithEvents btnNavReports As System.Windows.Forms.Button
         Friend WithEvents btnNavUsers As System.Windows.Forms.Button
         Friend WithEvents pnlLogout As System.Windows.Forms.Panel
