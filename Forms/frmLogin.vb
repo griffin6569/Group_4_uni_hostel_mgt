@@ -23,8 +23,11 @@ Namespace Forms
             ThemeManager.EnableDoubleBuffering(pnlRootAmbient)
             ThemeManager.EnableDoubleBuffering(pnlLoginCard)
             ThemeManager.EnableDoubleBuffering(pnlLeftBrand)
-            ThemeManager.EnableDoubleBuffering(pnlQuickCreds)
+            ThemeManager.EnableDoubleBuffering(picBrandLogo)
             ThemeManager.EnableDoubleBuffering(pnlDbStatusBadge)
+
+            ' Load official Dedan Kimathi University of Technology logo
+            picBrandLogo.Image = ThemeManager.GetInstitutionalLogo()
 
             ' Display active database status
             lblDbStatusText.Text = $"Database: Connected [{DbConfig.Database}]"

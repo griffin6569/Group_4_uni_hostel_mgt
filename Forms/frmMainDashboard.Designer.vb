@@ -105,9 +105,9 @@ Namespace Forms
             Me.lblBrandSub.ForeColor = System.Drawing.Color.FromArgb(CType(CType(217, Byte), Integer), CType(CType(119, Byte), Integer), CType(CType(6, Byte), Integer))
             Me.lblBrandSub.Location = New System.Drawing.Point(64, 40)
             Me.lblBrandSub.Name = "lblBrandSub"
-            Me.lblBrandSub.Size = New System.Drawing.Size(147, 12)
+            Me.lblBrandSub.Size = New System.Drawing.Size(160, 12)
             Me.lblBrandSub.TabIndex = 2
-            Me.lblBrandSub.Text = "ACCOMMODATION PORTAL"
+            Me.lblBrandSub.Text = "DEDAN KIMATHI UNIVERSITY"
             Me.lblBrandSub.UseMnemonic = False
             '
             'lblBrandTitle
@@ -119,7 +119,7 @@ Namespace Forms
             Me.lblBrandTitle.Name = "lblBrandTitle"
             Me.lblBrandTitle.Size = New System.Drawing.Size(155, 19)
             Me.lblBrandTitle.TabIndex = 1
-            Me.lblBrandTitle.Text = "UNIVERSITY HOSTEL"
+            Me.lblBrandTitle.Text = "DeKUT HOSTELS"
             Me.lblBrandTitle.UseMnemonic = False
             '
             'picCrest

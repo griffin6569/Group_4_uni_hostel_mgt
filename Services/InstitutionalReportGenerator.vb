@@ -119,7 +119,7 @@ Namespace Services
 
             ' Header
             sb.AppendLine("<div class='header'>")
-            sb.AppendLine("<div class='crest'>🏛️ UNIVERSITY ACCOMMODATION BOARD</div>")
+            sb.AppendLine("<div class='crest'>DEDAN KIMATHI UNIVERSITY OF TECHNOLOGY — DIRECTORATE OF ACCOMMODATION</div>")
             sb.AppendLine($"<div class='title'>{_meta.ReportTitle}</div>")
             sb.AppendLine($"<div class='sub'>{_meta.Subtitle}</div>")
             sb.AppendLine("</div>")
@@ -170,9 +170,9 @@ Namespace Services
             ThemeManager.DrawAcademicCrest(g, crestRect, ThemeManager.AcademicGold, ThemeManager.NavyPrimary)
 
             ' Titles
-            Using fontCrest As New Font("Segoe UI", 12.0F, FontStyle.Bold)
+            Using fontCrest As New Font("Segoe UI", 11.0F, FontStyle.Bold)
                 Using brushNavy As New SolidBrush(ThemeManager.NavyPrimary)
-                    g.DrawString("UNIVERSITY ACCOMMODATION & HOUSING BOARD", fontCrest, brushNavy, bounds.Left + 55, y)
+                    g.DrawString("DEDAN KIMATHI UNIVERSITY OF TECHNOLOGY — ACCOMMODATION BOARD", fontCrest, brushNavy, bounds.Left + 55, y)
                 End Using
             End Using
 

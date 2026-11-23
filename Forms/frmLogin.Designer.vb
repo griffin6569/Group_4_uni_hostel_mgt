@@ -27,9 +27,7 @@ Namespace Forms
             Me.lblHeaderTitle = New System.Windows.Forms.Label()
             Me.pnlRootAmbient = New University_hostel_mgt.Controls.AmbientBackgroundPanel()
             Me.pnlLeftBrand = New University_hostel_mgt.Controls.GlassPanel()
-            Me.pnlQuickCreds = New University_hostel_mgt.Controls.GlassPanel()
-            Me.lblCredsList = New System.Windows.Forms.Label()
-            Me.lblCredsTitle = New System.Windows.Forms.Label()
+            Me.picBrandLogo = New System.Windows.Forms.PictureBox()
             Me.pnlDbStatusBadge = New University_hostel_mgt.Controls.GlassPanel()
             Me.lblDbStatusText = New System.Windows.Forms.Label()
             Me.lblDbStatusDot = New System.Windows.Forms.Label()
@@ -49,7 +47,6 @@ Namespace Forms
             Me.pnlHeader.SuspendLayout()
             Me.pnlRootAmbient.SuspendLayout()
             Me.pnlLeftBrand.SuspendLayout()
-            Me.pnlQuickCreds.SuspendLayout()
             Me.pnlDbStatusBadge.SuspendLayout()
             Me.pnlLoginCard.SuspendLayout()
             Me.SuspendLayout()
@@ -132,11 +129,11 @@ Namespace Forms
             '
             Me.pnlLeftBrand.BorderColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.pnlLeftBrand.BorderWidth = 1.0!
-            Me.pnlLeftBrand.Controls.Add(Me.pnlQuickCreds)
             Me.pnlLeftBrand.Controls.Add(Me.pnlDbStatusBadge)
             Me.pnlLeftBrand.Controls.Add(Me.lblBrandDesc)
             Me.pnlLeftBrand.Controls.Add(Me.lblBrandSub)
             Me.pnlLeftBrand.Controls.Add(Me.lblBrandTitle)
+            Me.pnlLeftBrand.Controls.Add(Me.picBrandLogo)
             Me.pnlLeftBrand.CornerRadius = 18
             Me.pnlLeftBrand.Dock = System.Windows.Forms.DockStyle.Left
             Me.pnlLeftBrand.FillColor = System.Drawing.Color.FromArgb(CType(CType(190, Byte), Integer), CType(CType(17, Byte), Integer), CType(CType(24, Byte), Integer), CType(CType(33, Byte), Integer))
@@ -147,46 +144,54 @@ Namespace Forms
             Me.pnlLeftBrand.Size = New System.Drawing.Size(370, 509)
             Me.pnlLeftBrand.TabIndex = 0
             '
-            'pnlQuickCreds
+            'picBrandLogo
             '
-            Me.pnlQuickCreds.BorderColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.pnlQuickCreds.BorderWidth = 1.0!
-            Me.pnlQuickCreds.Controls.Add(Me.lblCredsList)
-            Me.pnlQuickCreds.Controls.Add(Me.lblCredsTitle)
-            Me.pnlQuickCreds.CornerRadius = 14
-            Me.pnlQuickCreds.Dock = System.Windows.Forms.DockStyle.Bottom
-            Me.pnlQuickCreds.FillColor = System.Drawing.Color.FromArgb(CType(CType(180, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(32, Byte), Integer), CType(CType(44, Byte), Integer))
-            Me.pnlQuickCreds.GlowColor = System.Drawing.Color.Transparent
-            Me.pnlQuickCreds.Location = New System.Drawing.Point(24, 323)
-            Me.pnlQuickCreds.Name = "pnlQuickCreds"
-            Me.pnlQuickCreds.Padding = New System.Windows.Forms.Padding(14)
-            Me.pnlQuickCreds.Size = New System.Drawing.Size(322, 162)
-            Me.pnlQuickCreds.TabIndex = 4
+            Me.picBrandLogo.BackColor = System.Drawing.Color.Transparent
+            Me.picBrandLogo.Location = New System.Drawing.Point(130, 26)
+            Me.picBrandLogo.Name = "picBrandLogo"
+            Me.picBrandLogo.Size = New System.Drawing.Size(110, 110)
+            Me.picBrandLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
+            Me.picBrandLogo.TabIndex = 0
+            Me.picBrandLogo.TabStop = False
             '
-            'lblCredsList
+            'lblBrandTitle
             '
-            Me.lblCredsList.BackColor = System.Drawing.Color.Transparent
-            Me.lblCredsList.Dock = System.Windows.Forms.DockStyle.Fill
-            Me.lblCredsList.Font = New System.Drawing.Font("Consolas", 8.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-            Me.lblCredsList.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
-            Me.lblCredsList.Location = New System.Drawing.Point(14, 34)
-            Me.lblCredsList.Name = "lblCredsList"
-            Me.lblCredsList.Size = New System.Drawing.Size(294, 114)
-            Me.lblCredsList.TabIndex = 1
-            Me.lblCredsList.Text = "• superadmin (Admin@2026!)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "• admin (Admin@2026!)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "• accomm_officer (Officer@2026!" &
-    ")" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "• finance_officer (Finance@2026!)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "• viewer (Viewer@2026!)"
+            Me.lblBrandTitle.BackColor = System.Drawing.Color.Transparent
+            Me.lblBrandTitle.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
+            Me.lblBrandTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
+            Me.lblBrandTitle.Location = New System.Drawing.Point(20, 146)
+            Me.lblBrandTitle.Name = "lblBrandTitle"
+            Me.lblBrandTitle.Size = New System.Drawing.Size(330, 48)
+            Me.lblBrandTitle.TabIndex = 1
+            Me.lblBrandTitle.Text = "DEDAN KIMATHI UNIVERSITY OF TECHNOLOGY"
+            Me.lblBrandTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
             '
-            'lblCredsTitle
+            'lblBrandSub
             '
-            Me.lblCredsTitle.BackColor = System.Drawing.Color.Transparent
-            Me.lblCredsTitle.Dock = System.Windows.Forms.DockStyle.Top
-            Me.lblCredsTitle.Font = New System.Drawing.Font("Segoe UI Semibold", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.lblCredsTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
-            Me.lblCredsTitle.Location = New System.Drawing.Point(14, 14)
-            Me.lblCredsTitle.Name = "lblCredsTitle"
-            Me.lblCredsTitle.Size = New System.Drawing.Size(294, 20)
-            Me.lblCredsTitle.TabIndex = 0
-            Me.lblCredsTitle.Text = "PROVISIONED SYSTEM ROLES"
+            Me.lblBrandSub.BackColor = System.Drawing.Color.Transparent
+            Me.lblBrandSub.Font = New System.Drawing.Font("Segoe UI Semibold", 9.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
+            Me.lblBrandSub.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
+            Me.lblBrandSub.Location = New System.Drawing.Point(20, 198)
+            Me.lblBrandSub.Name = "lblBrandSub"
+            Me.lblBrandSub.Size = New System.Drawing.Size(330, 24)
+            Me.lblBrandSub.TabIndex = 2
+            Me.lblBrandSub.Text = "Directorate of Student Accommodation"
+            Me.lblBrandSub.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+            Me.lblBrandSub.UseMnemonic = False
+            '
+            'lblBrandDesc
+            '
+            Me.lblBrandDesc.BackColor = System.Drawing.Color.Transparent
+            Me.lblBrandDesc.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
+            Me.lblBrandDesc.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
+            Me.lblBrandDesc.Location = New System.Drawing.Point(24, 234)
+            Me.lblBrandDesc.Name = "lblBrandDesc"
+            Me.lblBrandDesc.Size = New System.Drawing.Size(322, 110)
+            Me.lblBrandDesc.TabIndex = 3
+            Me.lblBrandDesc.Text = "Official staff security gateway for student residence allocations, individual bed " &
+    "matrices, semester billing schedules, room diagnostics, and auditable enterprise " &
+    "operations."
+            Me.lblBrandDesc.TextAlign = System.Drawing.ContentAlignment.TopCenter
             '
             'pnlDbStatusBadge
             '
@@ -197,11 +202,11 @@ Namespace Forms
             Me.pnlDbStatusBadge.CornerRadius = 10
             Me.pnlDbStatusBadge.FillColor = System.Drawing.Color.FromArgb(CType(CType(160, Byte), Integer), CType(CType(20, Byte), Integer), CType(CType(28, Byte), Integer), CType(CType(38, Byte), Integer))
             Me.pnlDbStatusBadge.GlowColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
-            Me.pnlDbStatusBadge.Location = New System.Drawing.Point(24, 248)
+            Me.pnlDbStatusBadge.Location = New System.Drawing.Point(24, 445)
             Me.pnlDbStatusBadge.Name = "pnlDbStatusBadge"
             Me.pnlDbStatusBadge.Padding = New System.Windows.Forms.Padding(8)
             Me.pnlDbStatusBadge.Size = New System.Drawing.Size(322, 38)
-            Me.pnlDbStatusBadge.TabIndex = 3
+            Me.pnlDbStatusBadge.TabIndex = 4
             '
             'lblDbStatusText
             '
@@ -225,43 +230,6 @@ Namespace Forms
             Me.lblDbStatusDot.Size = New System.Drawing.Size(18, 20)
             Me.lblDbStatusDot.TabIndex = 0
             Me.lblDbStatusDot.Text = "●"
-            '
-            'lblBrandDesc
-            '
-            Me.lblBrandDesc.BackColor = System.Drawing.Color.Transparent
-            Me.lblBrandDesc.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-            Me.lblBrandDesc.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
-            Me.lblBrandDesc.Location = New System.Drawing.Point(24, 128)
-            Me.lblBrandDesc.Name = "lblBrandDesc"
-            Me.lblBrandDesc.Size = New System.Drawing.Size(322, 100)
-            Me.lblBrandDesc.TabIndex = 2
-            Me.lblBrandDesc.Text = "Enterprise student accommodation management platform. Controls individual bed-lev" &
-    "el allocations, academic semester billing, real-time financial tracking, room ph" &
-    "otograph galleries, and audit trails."
-            '
-            'lblBrandSub
-            '
-            Me.lblBrandSub.AutoSize = True
-            Me.lblBrandSub.BackColor = System.Drawing.Color.Transparent
-            Me.lblBrandSub.Font = New System.Drawing.Font("Segoe UI Semibold", 9.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.lblBrandSub.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
-            Me.lblBrandSub.Location = New System.Drawing.Point(24, 86)
-            Me.lblBrandSub.Name = "lblBrandSub"
-            Me.lblBrandSub.Size = New System.Drawing.Size(248, 17)
-            Me.lblBrandSub.TabIndex = 1
-            Me.lblBrandSub.Text = "Bed-Level Allocation & Billing Directorate"
-            Me.lblBrandSub.UseMnemonic = False
-            '
-            'lblBrandTitle
-            '
-            Me.lblBrandTitle.BackColor = System.Drawing.Color.Transparent
-            Me.lblBrandTitle.Font = New System.Drawing.Font("Segoe UI", 16.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.lblBrandTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
-            Me.lblBrandTitle.Location = New System.Drawing.Point(24, 22)
-            Me.lblBrandTitle.Name = "lblBrandTitle"
-            Me.lblBrandTitle.Size = New System.Drawing.Size(322, 60)
-            Me.lblBrandTitle.TabIndex = 0
-            Me.lblBrandTitle.Text = "UNIVERSITY HOSTEL MANAGEMENT"
             '
             'pnlLoginCard
             '
@@ -423,7 +391,6 @@ Namespace Forms
             Me.pnlRootAmbient.ResumeLayout(False)
             Me.pnlLeftBrand.ResumeLayout(False)
             Me.pnlLeftBrand.PerformLayout()
-            Me.pnlQuickCreds.ResumeLayout(False)
             Me.pnlDbStatusBadge.ResumeLayout(False)
             Me.pnlDbStatusBadge.PerformLayout()
             Me.pnlLoginCard.ResumeLayout(False)
@@ -439,15 +406,13 @@ Namespace Forms
         Friend WithEvents btnMinimize As System.Windows.Forms.Button
         Friend WithEvents pnlRootAmbient As University_hostel_mgt.Controls.AmbientBackgroundPanel
         Friend WithEvents pnlLeftBrand As University_hostel_mgt.Controls.GlassPanel
+        Friend WithEvents picBrandLogo As System.Windows.Forms.PictureBox
         Friend WithEvents lblBrandTitle As System.Windows.Forms.Label
         Friend WithEvents lblBrandSub As System.Windows.Forms.Label
         Friend WithEvents lblBrandDesc As System.Windows.Forms.Label
         Friend WithEvents pnlDbStatusBadge As University_hostel_mgt.Controls.GlassPanel
         Friend WithEvents lblDbStatusDot As System.Windows.Forms.Label
         Friend WithEvents lblDbStatusText As System.Windows.Forms.Label
-        Friend WithEvents pnlQuickCreds As University_hostel_mgt.Controls.GlassPanel
-        Friend WithEvents lblCredsTitle As System.Windows.Forms.Label
-        Friend WithEvents lblCredsList As System.Windows.Forms.Label
         Friend WithEvents pnlLoginCard As University_hostel_mgt.Controls.GlassPanel
         Friend WithEvents lblSignInHeader As System.Windows.Forms.Label
         Friend WithEvents lblSignInSub As System.Windows.Forms.Label

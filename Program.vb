@@ -249,8 +249,8 @@ Public Module Program
                 login.StartPosition = FormStartPosition.Manual
                 login.Location = New Point(100, 100)
                 login.Show()
-                login.txtUsername.TextValue = "accomm_officer"
-                login.txtPassword.TextValue = "Officer@2026!"
+                login.txtUsername.TextValue = DotEnv.Get("STAFF_ACCOMM_OFFICER_USER", "accomm_officer")
+                login.txtPassword.TextValue = DotEnv.Get("STAFF_ACCOMM_OFFICER_PASS", "Officer@2026!")
                 Application.DoEvents()
                 System.Threading.Thread.Sleep(200)
                 Application.DoEvents()

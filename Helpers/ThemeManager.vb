@@ -170,10 +170,38 @@ Namespace Helpers
             Return path
         End Function
 
+        Private Shared _cachedDeKutLogo As Image = Nothing
+
         ''' <summary>
-        ''' Draws a prestigious academic shield insignia with an open book and architectural arch.
+        ''' Gets the official Dedan Kimathi University of Technology institutional logo.
+        ''' </summary>
+        Public Shared Function GetInstitutionalLogo() As Image
+            If _cachedDeKutLogo Is Nothing Then
+                _cachedDeKutLogo = ImageManager.LoadImageSafely("Assets/dekut_logo.png", 240, 240, "DeKUT")
+            End If
+            Return _cachedDeKutLogo
+        End Function
+
+        ''' <summary>
+        ''' Draws the official Dedan Kimathi University of Technology logo or prestigious fallback shield.
         ''' </summary>
         Public Shared Sub DrawAcademicCrest(g As Graphics, bounds As RectangleF, goldColor As Color, accentNavy As Color)
+            Dim logo = GetInstitutionalLogo()
+            If logo IsNot Nothing AndAlso logo.Width > 16 AndAlso logo.Height > 16 Then
+                g.SmoothingMode = SmoothingMode.AntiAlias
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality
+
+                Dim scale As Single = Math.Min(bounds.Width / CSng(logo.Width), bounds.Height / CSng(logo.Height))
+                Dim drawW As Single = logo.Width * scale
+                Dim drawH As Single = logo.Height * scale
+                Dim drawX As Single = bounds.X + (bounds.Width - drawW) / 2.0F
+                Dim drawY As Single = bounds.Y + (bounds.Height - drawH) / 2.0F
+
+                g.DrawImage(logo, drawX, drawY, drawW, drawH)
+                Return
+            End If
+
             g.SmoothingMode = SmoothingMode.AntiAlias
             g.PixelOffsetMode = PixelOffsetMode.HighQuality
 
