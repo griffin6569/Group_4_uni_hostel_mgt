@@ -11,13 +11,14 @@ Imports University_hostel_mgt.Helpers
 Namespace Forms
     ''' <summary>
     ''' Ultra-modern academic launch sequence featuring silky 60 FPS lerp-interpolated progress,
-    ''' dynamic specular shimmer sweep, official Dedan Kimathi University of Technology branding,
-    ''' and real-time ADO.NET SQL Server kernel boot diagnostics.
+    ''' dynamic specular shimmer sweep, glowing leading-edge pulse, official Dedan Kimathi University
+    ''' of Technology branding, and streamlined service bootloader.
     ''' </summary>
     Public Class frmSplash
         Private _currentProgress As Single = 0.0F
-        Private _targetProgress As Single = 8.0F
-        Private _shimmerOffset As Single = -100.0F
+        Private _targetProgress As Single = 10.0F
+        Private _shimmerOffset As Single = -120.0F
+        Private _pulsePhase As Single = 0.0F
         Private _isInitializing As Boolean = False
         Private _initComplete As Boolean = False
         Private _initError As Boolean = False
@@ -31,8 +32,7 @@ Namespace Forms
             ThemeManager.EnableDoubleBuffering(pnlProgressTrack)
             ThemeManager.EnableDoubleBuffering(picCrest)
 
-            ' Initialize badges
-            ResetStageBadges()
+            picCrest.Image = ThemeManager.GetInstitutionalLogo()
             tmrAnimation.Start()
 
             If AutoInitialize Then
@@ -41,43 +41,15 @@ Namespace Forms
         End Sub
 
         ''' <summary>
-        ''' Renders all diagnostic checklist items in their verified operational state for preview and documentation.
+        ''' Renders the progress bar in an active loading state for documentation and visual review.
         ''' </summary>
         Public Sub SetDiagnosticStateForPreview()
-            MarkStageVerified(lblStage1, "✓ .ENV CONFIG")
-            MarkStageVerified(lblStage2, "✓ SQL SERVER")
-            MarkStageVerified(lblStage3, "✓ SEMESTER")
-            MarkStageVerified(lblStage4, "✓ BED ASSETS")
-            MarkStageVerified(lblStage5, "✓ PBKDF2 VAULT")
-
-            _currentProgress = 88.0F
-            _targetProgress = 88.0F
-            lblPercent.Text = "88%"
-            lblStatusTicker.Text = "All diagnostic checks passed. Preparing staff authentication gateway..."
+            _currentProgress = 82.0F
+            _targetProgress = 82.0F
+            lblPercent.Text = "82%"
+            lblStatusTicker.Text = "Loading residential units & services..."
             lblStatusTicker.ForeColor = ThemeManager.EmeraldPrimary
             pnlProgressTrack.Invalidate()
-        End Sub
-
-        Private Sub ResetStageBadges()
-            Dim pendingColor As Color = Color.FromArgb(148, 163, 184)
-            Dim pendingBg As Color = Color.FromArgb(22, 37, 59)
-
-            For Each lbl In {lblStage1, lblStage2, lblStage3, lblStage4, lblStage5}
-                lbl.ForeColor = pendingColor
-                lbl.BackColor = pendingBg
-            Next
-        End Sub
-
-        Private Sub MarkStageVerified(lbl As Label, text As String)
-            lbl.Text = text
-            lbl.ForeColor = Color.FromArgb(16, 185, 129)
-            lbl.BackColor = Color.FromArgb(20, 16, 185, 129)
-        End Sub
-
-        Private Sub MarkStageFailed(lbl As Label, text As String)
-            lbl.Text = text
-            lbl.ForeColor = Color.FromArgb(239, 68, 68)
-            lbl.BackColor = Color.FromArgb(30, 239, 68, 68)
         End Sub
 
         ' 1. Custom Paint: Dedan Kimathi University of Technology Crest Insignia
@@ -86,7 +58,8 @@ Namespace Forms
                                            ThemeManager.AcademicGold, ThemeManager.NavyDark)
         End Sub
 
-        ' 2. Custom Paint: Premium Smooth Rounded Progress Bar with Specular Shimmer Sweep
+        ' 2. Custom Paint: Ultra-Premium Smooth Rounded Progress Bar with Multi-stop Gradient,
+        ' Specular Shimmer Sweep, and Glowing Leading-Edge Pulse Beacon
         Private Sub pnlProgressTrack_Paint(sender As Object, e As PaintEventArgs) Handles pnlProgressTrack.Paint
             Dim g As Graphics = e.Graphics
             g.SmoothingMode = SmoothingMode.AntiAlias
@@ -95,12 +68,12 @@ Namespace Forms
             Dim trackRect As New RectangleF(0, 0, pnlProgressTrack.Width - 1, pnlProgressTrack.Height - 1)
             Dim radius As Single = trackRect.Height / 2.0F
 
-            ' A. Rounded dark track background
+            ' A. Rounded dark track background well
             Using trackPath As GraphicsPath = ThemeManager.CreateRoundedRectangle(trackRect, radius)
-                Using trackBrush As New SolidBrush(Color.FromArgb(22, 37, 59))
+                Using trackBrush As New SolidBrush(Color.FromArgb(14, 22, 35))
                     g.FillPath(trackBrush, trackPath)
                 End Using
-                Using borderPen As New Pen(Color.FromArgb(35, 255, 255, 255), 1.0F)
+                Using borderPen As New Pen(Color.FromArgb(38, 255, 255, 255), 1.0F)
                     g.DrawPath(borderPen, trackPath)
                 End Using
             End Using
@@ -110,63 +83,90 @@ Namespace Forms
             If fillWidth > 4.0F Then
                 Dim fillRect As New RectangleF(0, 0, fillWidth, trackRect.Height)
                 Using fillPath As GraphicsPath = ThemeManager.CreateRoundedRectangle(fillRect, radius)
-                    ' Lush multi-stop gradient fill: Emerald to Gold (or Coral if error)
                     If _initError Then
-                        Using errorBrush As New SolidBrush(Color.FromArgb(239, 68, 68))
+                        Using errorBrush As New SolidBrush(ThemeManager.Coral)
                             g.FillPath(errorBrush, fillPath)
                         End Using
                     Else
+                        ' Rich 3-stop multi-tone gradient: Sapphire Ice (#38BDF8) -> Emerald (#10B981) -> Heraldic Gold (#F59E0B)
                         Using gradBrush As New LinearGradientBrush(
                             New PointF(0, 0),
                             New PointF(trackRect.Width, 0),
-                            Color.FromArgb(16, 185, 129),
+                            Color.FromArgb(56, 189, 248),
                             Color.FromArgb(245, 158, 11))
+
+                            Dim colorBlend As New ColorBlend(3)
+                            colorBlend.Colors = {
+                                Color.FromArgb(56, 189, 248),
+                                Color.FromArgb(16, 185, 129),
+                                Color.FromArgb(245, 158, 11)
+                            }
+                            colorBlend.Positions = {0.0F, 0.55F, 1.0F}
+                            gradBrush.InterpolationColors = colorBlend
+
                             g.FillPath(gradBrush, fillPath)
                         End Using
 
-                        ' C. Dynamic specular shimmer light beam sweep
-                        Dim shimmerWidth As Single = 80.0F
+                        ' C. Dynamic specular shimmer light sweep
+                        Dim shimmerWidth As Single = 100.0F
                         Dim shimmerRect As New RectangleF(_shimmerOffset, 0, shimmerWidth, trackRect.Height)
                         g.SetClip(fillPath)
                         Using shimmerBrush As New LinearGradientBrush(
                             shimmerRect,
                             Color.Transparent,
-                            Color.FromArgb(160, 255, 255, 255),
+                            Color.FromArgb(180, 255, 255, 255),
                             LinearGradientMode.Horizontal)
                             Dim blend As New ColorBlend(3)
-                            blend.Colors = {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(180, 255, 255, 255), Color.FromArgb(0, 255, 255, 255)}
+                            blend.Colors = {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(190, 255, 255, 255), Color.FromArgb(0, 255, 255, 255)}
                             blend.Positions = {0.0F, 0.5F, 1.0F}
                             shimmerBrush.InterpolationColors = blend
                             g.FillRectangle(shimmerBrush, shimmerRect)
                         End Using
                         g.ResetClip()
+
+                        ' D. Glowing neon pulse beacon at the leading edge
+                        Dim pulseAlpha As Integer = CInt(160 + 80 * Math.Sin(_pulsePhase))
+                        pulseAlpha = Math.Max(0, Math.Min(255, pulseAlpha))
+                        Dim beaconRadius As Single = trackRect.Height * 0.9F
+                        Dim beaconX As Single = fillWidth - (beaconRadius / 2.0F)
+                        Dim beaconY As Single = (trackRect.Height - beaconRadius) / 2.0F
+
+                        Using beaconBrush As New SolidBrush(Color.FromArgb(pulseAlpha, 255, 255, 255))
+                            g.FillEllipse(beaconBrush, beaconX, beaconY, beaconRadius, beaconRadius)
+                        End Using
                     End If
                 End Using
             End If
         End Sub
 
-        ' 3. Silky 60 FPS Lerp Animation Engine
+        ' 3. Silky 60 FPS Lerp & Easing Animation Engine
         Private Sub tmrAnimation_Tick(sender As Object, e As EventArgs) Handles tmrAnimation.Tick
             ' Smooth exponential lerp toward target
             Dim delta As Single = _targetProgress - _currentProgress
-            If Math.Abs(delta) > 0.04F Then
-                _currentProgress += delta * 0.12F
-                If Math.Abs(_targetProgress - _currentProgress) < 0.08F Then
+            If Math.Abs(delta) > 0.02F Then
+                _currentProgress += delta * 0.10F
+                If Math.Abs(_targetProgress - _currentProgress) < 0.05F Then
                     _currentProgress = _targetProgress
                 End If
             End If
 
             ' Specular highlight sweep loop
             _shimmerOffset += 5.5F
-            If _shimmerOffset > pnlProgressTrack.Width + 120.0F Then
-                _shimmerOffset = -100.0F
+            If _shimmerOffset > pnlProgressTrack.Width + 140.0F Then
+                _shimmerOffset = -120.0F
+            End If
+
+            ' Breathing pulse phase
+            _pulsePhase += 0.12F
+            If _pulsePhase > CSng(Math.PI * 2) Then
+                _pulsePhase -= CSng(Math.PI * 2)
             End If
 
             lblPercent.Text = $"{CInt(Math.Round(Math.Min(100.0F, Math.Max(0.0F, _currentProgress))))}%"
             pnlProgressTrack.Invalidate()
         End Sub
 
-        ' 4. Real-time ADO.NET SQL Server Kernel Boot Diagnostic Pipeline
+        ' 4. Clean, Streamlined Service Initialization Sequence
         Private Async Sub StartInitializationSequence()
             If _isInitializing Then Return
             _isInitializing = True
@@ -175,92 +175,63 @@ Namespace Forms
             btnExit.Visible = False
             lblStatusTicker.ForeColor = Color.FromArgb(56, 189, 248)
 
-            ' -------------------------------------------------------------
-            ' STAGE 1: Environment & Configuration Discovery
-            ' -------------------------------------------------------------
-            UpdateStatus("STAGE 1/5: Loading institutional environment configuration (.env)...", 18.0F)
-            Await Task.Delay(220)
+            ' Phase 1: Environment & Configuration
+            UpdateStatus("Starting workspace...", 22.0F)
+            Await Task.Delay(260)
             DotEnv.Load()
 
-            MarkStageVerified(lblStage1, "✓ .ENV CONFIG")
-            UpdateStatus($"Environment verified [{DotEnv.Get("APP_ENV", "production")}].", 28.0F)
-            Await Task.Delay(180)
-
-            ' -------------------------------------------------------------
-            ' STAGE 2: Relational Database Pipeline (SQL Server ADO.NET)
-            ' -------------------------------------------------------------
-            UpdateStatus($"STAGE 2/5: Establishing ADO.NET pipeline to {DbConfig.Database}...", 45.0F)
-            Await Task.Delay(200)
+            ' Phase 2: Relational Database Pipeline
+            UpdateStatus("Connecting to database...", 48.0F)
+            Await Task.Delay(220)
 
             Dim dbTest = Await DatabaseConnection.TestConnectionAsync()
             If Not dbTest.Success Then
-                HandleInitializationFailure("Database Connection Failed", dbTest.Message, 2)
+                HandleInitializationFailure("Database Connection Failed", dbTest.Message)
                 Return
             End If
 
-            MarkStageVerified(lblStage2, "✓ SQL SERVER")
-            UpdateStatus($"Database pipeline operational ({DbConfig.Database} on {DbConfig.Server}).", 58.0F)
-            Await Task.Delay(180)
+            ' Phase 3: Academic Catalog & Semester Resolution
+            UpdateStatus("Loading academic catalog...", 72.0F)
+            Await Task.Delay(240)
 
-            ' -------------------------------------------------------------
-            ' STAGE 3: Resolve Active Academic Semester from Database
-            ' -------------------------------------------------------------
-            UpdateStatus("STAGE 3/5: Resolving active academic semester from catalog...", 72.0F)
-            Await Task.Delay(180)
-
-            Dim activeSemesterName As String = "Academic Semester"
-            Dim activeAcademicYear As String = "2025/2026"
             Try
                 Dim sql As String = "SELECT semester_name, academic_year FROM dbo.semesters WHERE status = 'CURRENT';"
                 Dim dt As DataTable = DatabaseConnection.ExecuteDataTable(sql)
                 If dt.Rows.Count > 0 Then
-                    activeSemesterName = dt.Rows(0)("semester_name").ToString()
-                    activeAcademicYear = dt.Rows(0)("academic_year").ToString()
+                    Dim semName = dt.Rows(0)("semester_name").ToString()
+                    Dim yr = dt.Rows(0)("academic_year").ToString()
+                    UpdateStatus($"Active Semester: {semName} ({yr})", 82.0F)
+                    Await Task.Delay(220)
                 End If
             Catch ex As Exception
-                ' Fallback if table is seeding
+                ' Fallback
             End Try
 
-            MarkStageVerified(lblStage3, "✓ SEMESTER")
-            UpdateStatus($"Active Semester: {activeSemesterName} ({activeAcademicYear}).", 82.0F)
-            Await Task.Delay(180)
+            ' Phase 4: Sync Residential Assets & Security Vault
+            UpdateStatus("Syncing campus services...", 92.0F)
+            Await Task.Delay(240)
 
-            ' -------------------------------------------------------------
-            ' STAGE 4: Room Asset Directorate & Photo Gallery Verification
-            ' -------------------------------------------------------------
-            UpdateStatus("STAGE 4/5: Verifying hostel room photo galleries & bed asset matrices...", 92.0F)
-            Await Task.Delay(180)
             Try
                 Dim assetsDir As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "rooms")
                 Directory.CreateDirectory(assetsDir)
             Catch
             End Try
 
-            MarkStageVerified(lblStage4, "✓ BED ASSETS")
-            UpdateStatus("Hostel infrastructure & room galleries verified.", 96.0F)
-            Await Task.Delay(180)
-
-            ' -------------------------------------------------------------
-            ' STAGE 5: Cryptographic Security & Audit Subsystem (PBKDF2)
-            ' -------------------------------------------------------------
-            UpdateStatus("STAGE 5/5: Validating PBKDF2 HMAC-SHA256 authentication subsystem...", 100.0F)
-            Await Task.Delay(200)
-
-            MarkStageVerified(lblStage5, "✓ PBKDF2 VAULT")
+            ' Phase 5: Ready State & Launch
             lblStatusTicker.ForeColor = Color.FromArgb(16, 185, 129)
-            UpdateStatus("All diagnostic checks passed. Launching staff security gateway...", 100.0F)
+            UpdateStatus("Welcome to DeKUT Hostels", 100.0F)
 
-            ' Wait for progress lerp to smoothly complete to 100%
-            While _currentProgress < 99.0F
-                Await Task.Delay(25)
+            ' Wait for smooth progress lerp to finish visually
+            While _currentProgress < 99.5F
+                Await Task.Delay(20)
             End While
 
-            Await Task.Delay(350)
+            Await Task.Delay(380)
 
             _initComplete = True
             tmrAnimation.Stop()
 
-            ' Seamless handoff to frmLogin
+            ' Smooth transition to frmLogin
             Me.Hide()
             Dim loginForm As New frmLogin()
             loginForm.Show()
@@ -271,24 +242,10 @@ Namespace Forms
             _targetProgress = Math.Min(100.0F, Math.Max(0.0F, targetPercent))
         End Sub
 
-        Private Sub HandleInitializationFailure(title As String, errorMessage As String, failedStepIndex As Integer)
+        Private Sub HandleInitializationFailure(title As String, errorMessage As String)
             _initError = True
-            lblStatusTicker.ForeColor = Color.FromArgb(239, 68, 68)
-            lblStatusTicker.Text = $"[HALTED] {title}: {errorMessage}"
-
-            Select Case failedStepIndex
-                Case 1
-                    MarkStageFailed(lblStage1, "✗ .ENV CONFIG")
-                Case 2
-                    MarkStageFailed(lblStage2, "✗ SQL SERVER")
-                Case 3
-                    MarkStageFailed(lblStage3, "✗ SEMESTER")
-                Case 4
-                    MarkStageFailed(lblStage4, "✗ BED ASSETS")
-                Case 5
-                    MarkStageFailed(lblStage5, "✗ PBKDF2 VAULT")
-            End Select
-
+            lblStatusTicker.ForeColor = ThemeManager.Coral
+            lblStatusTicker.Text = $"Connection Notice: {errorMessage}"
             pnlProgressTrack.Invalidate()
             btnRetry.Visible = True
             btnExit.Visible = True
@@ -296,8 +253,7 @@ Namespace Forms
 
         Private Sub btnRetry_Click(sender As Object, e As EventArgs) Handles btnRetry.Click
             _currentProgress = 0.0F
-            _targetProgress = 8.0F
-            ResetStageBadges()
+            _targetProgress = 10.0F
             pnlProgressTrack.Invalidate()
             StartInitializationSequence()
         End Sub
