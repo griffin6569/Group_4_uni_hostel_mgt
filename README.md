@@ -49,6 +49,10 @@ graph TD
 | **Bed Space Matrix** | ![Bed Matrix](docs/screenshots/beds_matrix.png) |
 | **Bed Allocations Desk** | ![Bed Allocations](docs/screenshots/allocations_matrix.png) |
 | **Bursar Financial Ledger** | ![Bursar Billing](docs/screenshots/billing_ledger.png) |
+| **Hostel Maintenance Incident Desk** | ![Maintenance Desk](docs/screenshots/maintenance_desk.png) |
+| **Institutional Reports & Analytics** | ![Reports Analytics](docs/screenshots/reports_analytics.png) |
+| **Staff Administration & RBAC Vault** | ![Users Administration](docs/screenshots/users_administration.png) |
+| **Room Photograph Gallery** | ![Room Gallery](docs/screenshots/room_gallery.png) |
 | **Official Electronic Receipt** | ![Receipt Preview](docs/screenshots/receipt_preview.png) |
 | **Student Directory** | ![Students Directory](docs/screenshots/students_directory.png) |
 | **Login Vault** | ![Login Screen](docs/screenshots/login_screen.png) |
@@ -64,8 +68,21 @@ graph TD
    - `UQ_active_bed_per_semester`: Enforces that two students cannot occupy the same bed in the same academic semester.
    - `UQ_active_student_per_semester`: Enforces that one student cannot hold multiple active bed spaces in the same semester.
    - Bed status strictly transitions: `AVAILABLE` ➔ `OCCUPIED` ➔ `CHECKED_OUT` (or `TRANSFERRED`).
-4. **Maintenance Clearance Gating**: Beds under `MAINTENANCE` cannot be allocated. During student check-out, damage assessments can release a bed directly to maintenance with issue tracking.
-5. **Bursar Financial Ledger**: Supports multi-channel partial payments (`MPESA`, `BANK`, `CASH`, `OTHER`) with auto-reconciled student arrears.
+4. **Maintenance Desk & Automatic Bed Locking**:
+   - When an incident is reported on a bed, the bed's status is transactionally updated to `MAINTENANCE`.
+   - Database triggers enforce that any allocation attempted on a `MAINTENANCE` bed is rejected immediately.
+   - Upon incident resolution and technician sign-off, the bed space can be automatically restored to `AVAILABLE`.
+5. **Physical Asset Management Pipeline**:
+   - High-resolution room photographs and repair evidence are managed on disk under `Assets/rooms/` and `Assets/maintenance/`.
+   - Metadata and relative paths are stored in `dbo.room_images` with transactional primary photo assignment.
+   - Images are loaded via in-memory stream buffers to eliminate GDI+ OS file locking issues.
+6. **Institutional Reporting & Export Engine**:
+   - Four specialized analytical reports: Room Occupancy Schedule, Resident Allocation Ledger, Fee Collection & Arrears Schedule, and Facility Defaulters/Maintenance Register.
+   - Features standard `PrintDocument` high-resolution vector rendering with zoomable preview modal and standalone printable HTML export bearing the University Accommodation Board crest.
+7. **Staff Administration & Role-Based Access Control (RBAC)**:
+   - 5 Granular Roles: `SUPER_ADMIN`, `ADMIN`, `ACCOMMODATION_OFFICER`, `FINANCE_OFFICER`, and `VIEWER`.
+   - Enterprise PBKDF2-SHA256 password security with random salt generation.
+   - Immutable system audit trail in `dbo.activity_logs` recording user actions, IP addresses, entity references, and change descriptions.
 
 ---
 
@@ -97,6 +114,9 @@ dotnet run --no-build -- --test-dashboard
 
 # Phase 4: Bed allocations, rate snapshotting, check-in, transfers & billing ledger
 dotnet run --no-build -- --test-phase4
+
+# Phase 5: Room photograph assets, maintenance bed locking, reporting & RBAC audit trail
+dotnet run --no-build -- --test-phase5
 
 # Render and capture UI screen previews
 dotnet run --no-build -- --capture-screens

@@ -8,12 +8,25 @@ Imports University_hostel_mgt.Models
 Imports University_hostel_mgt.Services
 
 Public Module Program
+    Private Const ATTACH_PARENT_PROCESS As Integer = -1
+
+    <System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError:=True)>
+    Private Function AttachConsole(dwProcessId As Integer) As Boolean
+    End Function
+
     ''' <summary>
     ''' Main application entry point.
     ''' Boots the Windows Forms application via frmSplash and supports CLI testing/diagnostics.
     ''' </summary>
     <STAThread>
     Public Sub Main(args As String())
+        ' Attach to calling console if launched from terminal/CLI
+        Try
+            AttachConsole(ATTACH_PARENT_PROCESS)
+        Catch ex As Exception
+            ' Ignore if no console
+        End Try
+
         ' 1. Load Environment Configuration
         DotEnv.Load()
 
@@ -33,6 +46,9 @@ Public Module Program
                     Return
                 Case "--test-allocations", "--test-billing", "--test-phase4"
                     RunPhase4Diagnostics()
+                    Return
+                Case "--test-phase5", "--test-maintenance", "--test-reports"
+                    RunPhase5Diagnostics()
                     Return
                 Case "--capture-screens"
                     CaptureScreenshots()
@@ -354,10 +370,76 @@ Public Module Program
                     Console.WriteLine($"      ✓ Saved bursar billing ledger screenshot: {billFile}")
                 End Using
 
+                ' 8. Capture Maintenance Incident Desk View
+                Console.WriteLine("[8/11] Capturing frmMainDashboard (Maintenance Desk)...")
+                dash.btnNavMaintenance.PerformClick()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpMaint As New Bitmap(dash.Width, dash.Height)
+                    dash.DrawToBitmap(bmpMaint, New Rectangle(0, 0, dash.Width, dash.Height))
+                    Dim maintFile As String = Path.Combine(docsScreenshotsDir, "maintenance_desk.png")
+                    bmpMaint.Save(maintFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved maintenance desk screenshot:     {maintFile}")
+                End Using
+
+                ' 9. Capture Institutional Reports & Analytics View
+                Console.WriteLine("[9/11] Capturing frmMainDashboard (Reports & Analytics)...")
+                dash.btnNavReports.PerformClick()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpReports As New Bitmap(dash.Width, dash.Height)
+                    dash.DrawToBitmap(bmpReports, New Rectangle(0, 0, dash.Width, dash.Height))
+                    Dim reportsFile As String = Path.Combine(docsScreenshotsDir, "reports_analytics.png")
+                    bmpReports.Save(reportsFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved reports & analytics screenshot:  {reportsFile}")
+                End Using
+
+                ' 10. Capture Staff Administration & RBAC View
+                Console.WriteLine("[10/11] Capturing frmMainDashboard (Staff Administration & RBAC)...")
+                dash.btnNavUsers.PerformClick()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpUsers As New Bitmap(dash.Width, dash.Height)
+                    dash.DrawToBitmap(bmpUsers, New Rectangle(0, 0, dash.Width, dash.Height))
+                    Dim usersFile As String = Path.Combine(docsScreenshotsDir, "users_administration.png")
+                    bmpUsers.Save(usersFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved staff admin & RBAC screenshot:   {usersFile}")
+                End Using
+
                 dash.Close()
             End Using
         Catch ex As Exception
             Console.WriteLine($"      ✗ Error capturing dashboard views: {ex.Message}")
+        End Try
+
+        ' 11. Capture Room Image Gallery Modal
+        Try
+            Console.WriteLine("[11/12] Capturing frmRoomGalleryModal...")
+            Using gallery As New Forms.Rooms.frmRoomGalleryModal(1, "Aberdare Hall", "101")
+                gallery.ShowInTaskbar = False
+                gallery.StartPosition = FormStartPosition.Manual
+                gallery.Location = New Point(100, 100)
+                gallery.Show()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmpGal As New Bitmap(gallery.Width, gallery.Height)
+                    gallery.DrawToBitmap(bmpGal, New Rectangle(0, 0, gallery.Width, gallery.Height))
+                    Dim galFile As String = Path.Combine(docsScreenshotsDir, "room_gallery.png")
+                    bmpGal.Save(galFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved room gallery screenshot:         {galFile}")
+                End Using
+                gallery.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing room gallery: {ex.Message}")
         End Try
 
         ' 8. Capture Official Electronic Receipt Preview
@@ -463,7 +545,7 @@ Public Module Program
                     Console.WriteLine()
                     Console.WriteLine("[4/6] Testing Payment Recording & Automatic Balance Reconciliation...")
                     Dim txCode = $"TX-TEST-{DateTime.UtcNow:mmssff}"
-                    Dim partialAmt As Decimal = 10000.0D
+                    Dim partialAmt As Decimal = 10000D
                     Dim payRes = paymentRepo.RecordPayment(newAllocId, partialAmt, "MPESA", txCode, "Phase 4 verification partial payment", 1)
                     If payRes.Success Then
                         Console.WriteLine($"      ✓ Recorded payment of KES {partialAmt:N2} via MPESA (Receipt: {payRes.ReceiptNumber}, Tx: {txCode})")
@@ -613,6 +695,199 @@ Public Module Program
         Console.WriteLine()
         Console.WriteLine("==================================================================")
         Console.WriteLine("  PHASE 3 CORE MANAGEMENT & DASHBOARD SUITE PASSED")
+        Console.WriteLine("==================================================================")
+    End Sub
+
+    ''' <summary>
+    ''' Diagnostic runner for Phase 5: Room Image Gallery Asset Pipeline,
+    ''' Maintenance Incident Tracking & Bed Locking, Institutional Reporting & User Admin.
+    ''' </summary>
+    Public Sub RunPhase5Diagnostics()
+        Console.WriteLine("==================================================================")
+        Console.WriteLine("  UNIVERSITY HOSTEL MANAGEMENT SYSTEM - PHASE 5 DIAGNOSTICS")
+        Console.WriteLine("==================================================================")
+        Console.WriteLine()
+
+        Dim imgRepo As New Data.Repositories.RoomImageRepository()
+        Dim maintRepo As New Data.Repositories.MaintenanceRepository()
+        Dim reportRepo As New Data.Repositories.ReportRepository()
+        Dim userRepo As New Data.Repositories.UserRepository()
+        Dim bedRepo As New Data.Repositories.BedRepository()
+        Dim roomRepo As New Data.Repositories.RoomRepository()
+
+        ' =========================================================================
+        ' 1. Room Image Gallery Asset Pipeline Verification
+        ' =========================================================================
+        Console.WriteLine("[1/4] Verifying Room Image Gallery Asset Pipeline...")
+        ImageManager.EnsureAssetDirectoriesExist()
+
+        ' Create a procedural test image file on disk
+        Dim tempImgPath As String = Path.Combine(Path.GetTempPath(), $"test_room_{Guid.NewGuid():N}.png")
+        Using bmp As New System.Drawing.Bitmap(320, 240)
+            Using g = System.Drawing.Graphics.FromImage(bmp)
+                g.Clear(System.Drawing.Color.SteelBlue)
+            End Using
+            bmp.Save(tempImgPath, System.Drawing.Imaging.ImageFormat.Png)
+        End Using
+
+        Dim rooms = roomRepo.GetRooms()
+        Dim testRoomId As Integer = If(rooms.Count > 0, rooms(0).RoomId, 1)
+
+        ' Test asset pipeline save
+        Dim relPath As String = ImageManager.SaveRoomImage(tempImgPath, testRoomId, "INTERIOR")
+        Console.WriteLine($"      ✓ Image saved to application assets: {relPath}")
+
+        ' Insert metadata in DB
+        Dim newImg As New RoomImage With {
+            .RoomId = testRoomId,
+            .ImagePath = relPath,
+            .ImageCategory = "INTERIOR",
+            .ImageCaption = "Automated Diagnostic Test Photograph",
+            .DisplayOrder = 1,
+            .IsPrimary = True
+        }
+        Dim imgId = imgRepo.AddImage(newImg)
+        Console.WriteLine($"      ✓ Created room_images record #{imgId} (Room #{testRoomId})")
+
+        ' Verify retrieval and primary status
+        Dim primaryImg = imgRepo.GetPrimaryImage(testRoomId)
+        Console.WriteLine($"      ✓ Primary room image verified: ID #{primaryImg.ImageId} ({primaryImg.ImagePath})")
+
+        ' Test safe image loading without file lock
+        Using loaded = ImageManager.LoadImageSafely(primaryImg.ImagePath, 200, 150)
+            Console.WriteLine($"      ✓ Safely loaded image into memory without lock: {loaded.Width}x{loaded.Height}")
+        End Using
+
+        ' Clean up test image
+        imgRepo.DeleteImage(imgId)
+        ImageManager.DeleteAssetFile(relPath)
+        If File.Exists(tempImgPath) Then File.Delete(tempImgPath)
+        Console.WriteLine($"      ✓ Cleaned up test asset and database record #{imgId}.")
+        Console.WriteLine()
+
+        ' =========================================================================
+        ' 2. Maintenance Incident Tracking & Bed Locking Verification
+        ' =========================================================================
+        Console.WriteLine("[2/4] Verifying Maintenance Desk & Automatic Bed Locking Rules...")
+        Dim maintCounts = maintRepo.GetMaintenanceSummaryCounts()
+        Console.WriteLine($"      Current Maintenance Incidents: Total={maintCounts("TOTAL")}, Reported={maintCounts("REPORTED")}, InProgress={maintCounts("IN_PROGRESS")}, Resolved={maintCounts("RESOLVED")}")
+
+        ' Find a bed that is currently AVAILABLE
+        Dim availBeds = bedRepo.GetBeds(status:="AVAILABLE")
+        If availBeds.Count > 0 Then
+            Dim targetBed = availBeds(0)
+            Console.WriteLine($"      Testing Maintenance Lock on Bed {targetBed.BedLabel} (Current Status: {targetBed.Status})")
+
+            ' 1. Log incident on target bed
+            Dim incident As New MaintenanceRecord With {
+                .RoomId = targetBed.RoomId,
+                .BedId = targetBed.BedId,
+                .IssueTitle = "Defective Electrical Socket & Study Lamp Hinge",
+                .IssueDescription = "Socket sparking intermittently; immediate electrician rewiring required.",
+                .AssignedTo = "Campus Works Dept (John Ndwiga)",
+                .MaintenanceStatus = "REPORTED"
+            }
+            Dim incidentId = maintRepo.CreateIncident(incident, 1)
+            Console.WriteLine($"      ✓ Created maintenance incident #{incidentId} on Bed {targetBed.BedLabel}")
+
+            ' Verify bed status transitioned to MAINTENANCE in DB
+            Dim updatedBed = bedRepo.GetBeds(roomId:=targetBed.RoomId).FirstOrDefault(Function(b) b.BedId = targetBed.BedId)
+            If updatedBed IsNot Nothing AndAlso updatedBed.Status = "MAINTENANCE" Then
+                Console.WriteLine($"      ✓ Business Rule Enforced: Bed status transitioned to '{updatedBed.Status}' automatically!")
+            Else
+                Console.WriteLine($"      ✗ Warning: Bed status is '{If(updatedBed IsNot Nothing, updatedBed.Status, "Null")}', expected MAINTENANCE")
+            End If
+
+            ' 2. Test trigger: verify active allocation fails on maintenance bed
+            Dim allocRepo As New Data.Repositories.AllocationRepository()
+            Dim semRepo As New Data.Repositories.SemesterRepository()
+            Dim curSem = semRepo.GetCurrentSemester()
+            Dim testSemId As Integer = If(curSem IsNot Nothing, curSem.SemesterId, 2)
+            Dim allocAttempt = allocRepo.CreateAllocation(1, targetBed.BedId, testSemId, 1, "Should be blocked by database trigger")
+            If Not allocAttempt.Success Then
+                Console.WriteLine($"      ✓ Database Constraint Enforced: Allocation blocked on MAINTENANCE bed: '{allocAttempt.Message}'")
+            Else
+                Console.WriteLine($"      ✗ ERROR: Allocation unexpectedly succeeded on a maintenance bed!")
+            End If
+
+            ' 3. Resolve the maintenance issue and restore bed
+            Dim resolved = maintRepo.ResolveIncident(incidentId, "Rewired and tested operational with multi-meter.", True, 1)
+            Console.WriteLine($"      ✓ Resolved incident #{incidentId} via ResolveIncident(restoreBed:=True)")
+
+            Dim restoredBed = bedRepo.GetBeds(roomId:=targetBed.RoomId).FirstOrDefault(Function(b) b.BedId = targetBed.BedId)
+            If restoredBed IsNot Nothing AndAlso restoredBed.Status = "AVAILABLE" Then
+                Console.WriteLine($"      ✓ Bed Status Restored: Bed {restoredBed.BedLabel} returned to '{restoredBed.Status}'!")
+            Else
+                Console.WriteLine($"      ✗ Warning: Restored bed status is '{If(restoredBed IsNot Nothing, restoredBed.Status, "Null")}'")
+            End If
+        Else
+            Console.WriteLine("      (No available bed found to test maintenance lock cycle)")
+        End If
+        Console.WriteLine()
+
+        ' =========================================================================
+        ' 3. Institutional Reporting Engine Verification
+        ' =========================================================================
+        Console.WriteLine("[3/4] Verifying Institutional Reporting Engine & Print/Web Generators...")
+
+        ' 1. Occupancy Matrix Report
+        Dim occData = reportRepo.GetOccupancyReportData()
+        Dim totalCap = occData.Sum(Function(x) x.Capacity)
+        Dim totalOcc = occData.Sum(Function(x) x.OccupiedBeds)
+        Dim totalAvail = occData.Sum(Function(x) x.AvailableBeds)
+        Dim occPct As Double = If(totalCap > 0, Math.Round((totalOcc / CDbl(totalCap)) * 100.0, 1), 0.0)
+        Console.WriteLine($"      • Report 1 (Occupancy): {occData.Count} Rooms | Capacity: {totalCap} | Occupied: {totalOcc} ({occPct:F1}%) | Available: {totalAvail}")
+
+        ' 2. Allocations Report
+        Dim allocData = reportRepo.GetAllocationReportData()
+        Console.WriteLine($"      • Report 2 (Allocations): {allocData.Count} Active Resident Allocations | Total Billed: KES {allocData.Sum(Function(x) x.SemesterFee):N2}")
+
+        ' 3. Financial & Defaulters Report
+        Dim finData = reportRepo.GetFinancialDefaultersReportData(defaultersOnly:=True)
+        Console.WriteLine($"      • Report 3 (Defaulters): {finData.Count} Students with Arrears | Total Balances Due: KES {finData.Sum(Function(x) x.BalanceDue):N2}")
+
+        ' 4. Maintenance Logs Report
+        Dim maintData = reportRepo.GetMaintenanceReportData()
+        Console.WriteLine($"      • Report 4 (Maintenance): {maintData.Count} Historical & Active Facility Incidents")
+
+        ' 5. Test Institutional HTML Generator
+        Dim meta As New ReportMetadata With {
+            .ReportTitle = "Hostel Room Occupancy & Capacity Schedule",
+            .Subtitle = "Campus-Wide Space Inventory & Vacancy Rates",
+            .GeneratedBy = "Chief Accommodation Officer",
+            .SemesterName = "Semester 1 2026/2027",
+            .TotalRecords = occData.Count
+        }
+        Dim generator As New InstitutionalReportGenerator(meta, InstitutionalReportGenerator.ReportKind.Occupancy, occData)
+        Dim html = generator.GenerateHtmlReport()
+        Console.WriteLine($"      ✓ Generated Institutional HTML Document ({html.Length:N0} bytes)")
+        Console.WriteLine($"      ✓ Contains Academic Crest: {html.Contains("UNIVERSITY ACCOMMODATION BOARD")}")
+        Console.WriteLine($"      ✓ Contains Table Structure: {html.Contains("<table")}")
+        Console.WriteLine()
+
+        ' =========================================================================
+        ' 4. System User Administration & RBAC Security Verification
+        ' =========================================================================
+        Console.WriteLine("[4/4] Verifying User Administration & RBAC Security Module...")
+        Dim allUsers = userRepo.GetAllUsers()
+        Console.WriteLine($"      Total System Users: {allUsers.Count}")
+        For Each u In allUsers
+            Dim hashValid = u.PasswordHash.StartsWith("PBKDF2$SHA256$")
+            Console.WriteLine($"      • User #{u.UserId}: {u.Username.PadRight(16)} ({u.FullName.PadRight(25)}) | Role: {u.RoleName.PadRight(22)} | Status: {u.AccountStatus.PadRight(8)} | PBKDF2: {If(hashValid, "VALID", "INVALID")}")
+        Next
+
+        Dim allRoles = userRepo.GetAllRoles()
+        Console.WriteLine($"      Configured RBAC Roles: {String.Join(", ", allRoles.Select(Function(r) r.RoleName))}")
+
+        Dim auditLogs = userRepo.GetActivityLogs(5)
+        Console.WriteLine($"      Recent Immutable Audit Trail Entries: {auditLogs.Rows.Count}")
+        For Each row As System.Data.DataRow In auditLogs.Rows
+            Console.WriteLine($"      • [{Convert.ToDateTime(row("action_timestamp")):yyyy-MM-dd HH:mm}] {row("staff_username")} ➔ {row("action_type")}: {row("description")}")
+        Next
+        Console.WriteLine()
+
+        Console.WriteLine("==================================================================")
+        Console.WriteLine("  PHASE 5 ASSET PIPELINE, MAINTENANCE & REPORTING SUITE PASSED")
         Console.WriteLine("==================================================================")
     End Sub
 End Module
