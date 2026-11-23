@@ -246,7 +246,30 @@ Public Module Program
 
         Console.WriteLine("Capturing UI screenshots...")
 
-        ' 1. Capture Login Screen
+        ' 1A. Capture Portal Chooser Screen
+        Try
+            Using chooser As New Forms.frmPortalChooser()
+                chooser.ShowInTaskbar = False
+                chooser.StartPosition = FormStartPosition.Manual
+                chooser.Location = New Point(100, 100)
+                chooser.Show()
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmp As New Bitmap(chooser.Width, chooser.Height)
+                    chooser.DrawToBitmap(bmp, New Rectangle(0, 0, chooser.Width, chooser.Height))
+                    Dim chooserFile As String = Path.Combine(docsScreenshotsDir, "portal_chooser_screen.png")
+                    bmp.Save(chooserFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved portal chooser screenshot: {chooserFile}")
+                End Using
+                chooser.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing portal chooser: {ex.Message}")
+        End Try
+
+        ' 1B. Capture Staff Administration Gateway Screen
         Try
             Using login As New Forms.frmLogin()
                 login.ShowInTaskbar = False
@@ -262,13 +285,40 @@ Public Module Program
                 Using bmp As New Bitmap(login.Width, login.Height)
                     login.DrawToBitmap(bmp, New Rectangle(0, 0, login.Width, login.Height))
                     Dim loginFile As String = Path.Combine(docsScreenshotsDir, "login_screen.png")
+                    Dim staffLoginFile As String = Path.Combine(docsScreenshotsDir, "staff_login_screen.png")
                     bmp.Save(loginFile, System.Drawing.Imaging.ImageFormat.Png)
-                    Console.WriteLine($"      ✓ Saved login screenshot:  {loginFile}")
+                    bmp.Save(staffLoginFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved staff login screenshot:    {staffLoginFile}")
                 End Using
                 login.Close()
             End Using
         Catch ex As Exception
-            Console.WriteLine($"      ✗ Error capturing login: {ex.Message}")
+            Console.WriteLine($"      ✗ Error capturing staff login: {ex.Message}")
+        End Try
+
+        ' 1C. Capture Student Portal Login Screen
+        Try
+            Using sLogin As New Forms.StudentPortal.frmStudentLogin()
+                sLogin.ShowInTaskbar = False
+                sLogin.StartPosition = FormStartPosition.Manual
+                sLogin.Location = New Point(100, 100)
+                sLogin.Show()
+                sLogin.txtIdentifier.TextValue = "griffin.wekesa25@students.dkut.ac.ke"
+                sLogin.txtPassword.TextValue = "Student@2026!"
+                Application.DoEvents()
+                System.Threading.Thread.Sleep(200)
+                Application.DoEvents()
+
+                Using bmp As New Bitmap(sLogin.Width, sLogin.Height)
+                    sLogin.DrawToBitmap(bmp, New Rectangle(0, 0, sLogin.Width, sLogin.Height))
+                    Dim studLoginFile As String = Path.Combine(docsScreenshotsDir, "student_login_screen.png")
+                    bmp.Save(studLoginFile, System.Drawing.Imaging.ImageFormat.Png)
+                    Console.WriteLine($"      ✓ Saved student login screenshot:  {studLoginFile}")
+                End Using
+                sLogin.Close()
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"      ✗ Error capturing student login: {ex.Message}")
         End Try
 
         ' 2. Capture Splash Screen

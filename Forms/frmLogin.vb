@@ -9,8 +9,8 @@ Imports University_hostel_mgt.Services
 
 Namespace Forms
     ''' <summary>
-    ''' Ultra-modern staff authentication form featuring authentic glassmorphism panels,
-    ''' animated typing ripple effects, smooth focus illumination, and role-based validation.
+    ''' Ultra-modern staff authentication gateway featuring authentic glassmorphism panels,
+    ''' smooth focus illumination, and role-based staff administration validation.
     ''' </summary>
     Public Class frmLogin
         Private ReadOnly _authService As New AuthenticationService()
@@ -57,11 +57,15 @@ Namespace Forms
 
         ' 2. Window Controls
         Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
-            Application.Exit()
+            Me.Close()
         End Sub
 
         Private Sub btnMinimize_Click(sender As Object, e As EventArgs) Handles btnMinimize.Click
             Me.WindowState = FormWindowState.Minimized
+        End Sub
+
+        Private Sub btnBackToChooser_Click(sender As Object, e As EventArgs) Handles btnBackToChooser.Click
+            Me.Close()
         End Sub
 
         Private Sub btnExitApp_Click(sender As Object, e As EventArgs) Handles btnExitApp.Click
@@ -86,14 +90,14 @@ Namespace Forms
             End If
 
             If String.IsNullOrEmpty(password) Then
-                ShowStatus("Please enter your secure password.", ThemeManager.Coral)
+                ShowStatus("Please enter your administrative password.", ThemeManager.Coral)
                 txtPassword.Focus()
                 Return False
             End If
 
             ' Animated UI Loading State
             SetLoadingState(True)
-            ShowStatus("Verifying credentials against database...", ThemeManager.TextSecondary)
+            ShowStatus("Verifying administrative credentials...", ThemeManager.TextSecondary)
 
             ' Call Business Logic Layer
             Dim result As AuthenticationResult = Await _authService.AuthenticateAsync(username, password, "127.0.0.1")
@@ -108,14 +112,14 @@ Namespace Forms
                 Return False
             End If
 
-            ' Success State - Role-Based Routing
+            ' Staff role check: If student enters staff gateway, provide guidance
             If result.User.IsStudent Then
-                ShowStatus($"✓ Authenticated! Welcome, {result.User.FullName}...", ThemeManager.EmeraldPrimary)
-                Await Task.Delay(350)
+                ShowStatus("This console is for university staff. Launching Student Portal...", ThemeManager.Amber)
+                Await Task.Delay(500)
 
                 Me.Hide()
                 Using studentPortal As New Forms.StudentPortal.frmStudentDashboard(result.User)
-                    studentPortal.ShowDialog()
+                    studentPortal.ShowDialog(Me)
                 End Using
 
                 txtPassword.TextValue = String.Empty
@@ -126,49 +130,38 @@ Namespace Forms
             End If
 
             ' Staff Dashboard Route
-            ShowStatus($"✓ Authenticated! Launching Dashboard...", ThemeManager.EmeraldPrimary)
+            ShowStatus($"✓ Authenticated! Launching Administrative Console...", ThemeManager.EmeraldPrimary)
             Await Task.Delay(350)
 
             Me.Hide()
             Using dashboard As New frmMainDashboard(result.User)
-                dashboard.ShowDialog()
+                dashboard.ShowDialog(Me)
             End Using
 
             ' If dashboard closes (sign out), reset password and show login again
             txtPassword.TextValue = String.Empty
             txtPassword.Focus()
-            ShowStatus("Signed out. Please enter credentials to sign back in.", ThemeManager.TextSecondary)
+            ShowStatus("Signed out from administrative console.", ThemeManager.TextSecondary)
             Me.Show()
 
             Return True
         End Function
 
-        Private Sub btnStudentRegister_Click(sender As Object, e As EventArgs) Handles btnStudentRegister.Click
-            Using reg As New Forms.StudentPortal.frmStudentRegister()
-                If reg.ShowDialog(Me) = DialogResult.OK AndAlso reg.RegisteredUser IsNot Nothing Then
-                    txtUsername.TextValue = reg.RegisteredUser.Email
-                    txtPassword.TextValue = String.Empty
-                    txtPassword.Focus()
-                    ShowStatus("✓ Account created! Please enter your password to sign in.", ThemeManager.EmeraldPrimary)
-                End If
-            End Using
-        End Sub
-
         Private Sub SetLoadingState(isLoading As Boolean)
             btnLogin.Enabled = Not isLoading
-            btnStudentRegister.Enabled = Not isLoading
+            btnBackToChooser.Enabled = Not isLoading
             btnExitApp.Enabled = Not isLoading
             txtUsername.Enabled = Not isLoading
             txtPassword.Enabled = Not isLoading
 
             If isLoading Then
-                btnLogin.Text = "Authenticating..."
+                btnLogin.Text = "Verifying..."
                 btnLogin.PrimaryColor = Color.FromArgb(40, 255, 255, 255)
                 btnLogin.CustomTextColor = ThemeManager.TextSecondary
             Else
-                btnLogin.Text = "Sign In"
-                btnLogin.PrimaryColor = ThemeManager.EmeraldPrimary
-                btnLogin.CustomTextColor = ThemeManager.BgDark
+                btnLogin.Text = "Sign In to Admin Console"
+                btnLogin.PrimaryColor = Color.FromArgb(245, 158, 11)
+                btnLogin.CustomTextColor = Color.FromArgb(7, 10, 14)
             End If
         End Sub
 
@@ -179,7 +172,7 @@ Namespace Forms
 
         Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
             If keyData = Keys.Escape Then
-                Application.Exit()
+                Me.Close()
                 Return True
             End If
             Return MyBase.ProcessCmdKey(msg, keyData)

@@ -35,7 +35,7 @@ Namespace Forms
             Me.lblBrandSub = New System.Windows.Forms.Label()
             Me.lblBrandTitle = New System.Windows.Forms.Label()
             Me.pnlLoginCard = New University_hostel_mgt.Controls.GlassPanel()
-            Me.btnStudentRegister = New University_hostel_mgt.Controls.GlassButton()
+            Me.btnBackToChooser = New University_hostel_mgt.Controls.GlassButton()
             Me.btnExitApp = New University_hostel_mgt.Controls.GlassButton()
             Me.btnLogin = New University_hostel_mgt.Controls.GlassButton()
             Me.lblStatusMessage = New System.Windows.Forms.Label()
@@ -54,7 +54,7 @@ Namespace Forms
             '
             'pnlTopAccent
             '
-            Me.pnlTopAccent.BackColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
+            Me.pnlTopAccent.BackColor = System.Drawing.Color.FromArgb(CType(CType(245, Byte), Integer), CType(CType(158, Byte), Integer), CType(CType(11, Byte), Integer))
             Me.pnlTopAccent.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlTopAccent.Location = New System.Drawing.Point(0, 0)
             Me.pnlTopAccent.Name = "pnlTopAccent"
@@ -93,6 +93,7 @@ Namespace Forms
             Me.btnClose.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.btnClose.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnClose.FlatAppearance.BorderSize = 0
+            Me.btnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(239, Byte), Integer), CType(CType(68, Byte), Integer), CType(CType(68, Byte), Integer))
             Me.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnClose.Font = New System.Drawing.Font("Segoe UI", 11.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.btnClose.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
@@ -110,9 +111,9 @@ Namespace Forms
             Me.lblHeaderTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
             Me.lblHeaderTitle.Location = New System.Drawing.Point(16, 11)
             Me.lblHeaderTitle.Name = "lblHeaderTitle"
-            Me.lblHeaderTitle.Size = New System.Drawing.Size(315, 15)
+            Me.lblHeaderTitle.Size = New System.Drawing.Size(350, 15)
             Me.lblHeaderTitle.TabIndex = 0
-            Me.lblHeaderTitle.Text = "University Hostel Management System • Staff Authentication"
+            Me.lblHeaderTitle.Text = "Dedan Kimathi University of Technology • Staff Administration Gateway"
             '
             'pnlRootAmbient
             '
@@ -138,7 +139,7 @@ Namespace Forms
             Me.pnlLeftBrand.CornerRadius = 18
             Me.pnlLeftBrand.Dock = System.Windows.Forms.DockStyle.Left
             Me.pnlLeftBrand.FillColor = System.Drawing.Color.FromArgb(CType(CType(190, Byte), Integer), CType(CType(17, Byte), Integer), CType(CType(24, Byte), Integer), CType(CType(33, Byte), Integer))
-            Me.pnlLeftBrand.GlowColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
+            Me.pnlLeftBrand.GlowColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(245, Byte), Integer), CType(CType(158, Byte), Integer), CType(CType(11, Byte), Integer))
             Me.pnlLeftBrand.Location = New System.Drawing.Point(20, 20)
             Me.pnlLeftBrand.Name = "pnlLeftBrand"
             Me.pnlLeftBrand.Padding = New System.Windows.Forms.Padding(24)
@@ -171,7 +172,7 @@ Namespace Forms
             '
             Me.lblBrandSub.BackColor = System.Drawing.Color.Transparent
             Me.lblBrandSub.Font = New System.Drawing.Font("Segoe UI Semibold", 9.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.lblBrandSub.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
+            Me.lblBrandSub.ForeColor = System.Drawing.Color.FromArgb(CType(CType(245, Byte), Integer), CType(CType(158, Byte), Integer), CType(CType(11, Byte), Integer))
             Me.lblBrandSub.Location = New System.Drawing.Point(20, 198)
             Me.lblBrandSub.Name = "lblBrandSub"
             Me.lblBrandSub.Size = New System.Drawing.Size(330, 24)
@@ -189,9 +190,9 @@ Namespace Forms
             Me.lblBrandDesc.Name = "lblBrandDesc"
             Me.lblBrandDesc.Size = New System.Drawing.Size(322, 110)
             Me.lblBrandDesc.TabIndex = 3
-            Me.lblBrandDesc.Text = "Official staff security gateway for student residence allocations, individual bed " &
-    "matrices, semester billing schedules, room diagnostics, and auditable enterprise " &
-    "operations."
+            Me.lblBrandDesc.Text = "Official administrative security gateway for student residence allocations, indiv" &
+    "idual bed matrices, semester billing schedules, room diagnostics, and auditable " &
+    "enterprise operations."
             Me.lblBrandDesc.TextAlign = System.Drawing.ContentAlignment.TopCenter
             '
             'pnlDbStatusBadge
@@ -236,7 +237,7 @@ Namespace Forms
             '
             Me.pnlLoginCard.BorderColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.pnlLoginCard.BorderWidth = 1.0!
-            Me.pnlLoginCard.Controls.Add(Me.btnStudentRegister)
+            Me.pnlLoginCard.Controls.Add(Me.btnBackToChooser)
             Me.pnlLoginCard.Controls.Add(Me.btnExitApp)
             Me.pnlLoginCard.Controls.Add(Me.btnLogin)
             Me.pnlLoginCard.Controls.Add(Me.lblStatusMessage)
@@ -249,76 +250,78 @@ Namespace Forms
             Me.pnlLoginCard.CornerRadius = 18
             Me.pnlLoginCard.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlLoginCard.FillColor = System.Drawing.Color.FromArgb(CType(CType(200, Byte), Integer), CType(CType(17, Byte), Integer), CType(CType(24, Byte), Integer), CType(CType(33, Byte), Integer))
-            Me.pnlLoginCard.GlowColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
+            Me.pnlLoginCard.GlowColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(245, Byte), Integer), CType(CType(158, Byte), Integer), CType(CType(11, Byte), Integer))
             Me.pnlLoginCard.Location = New System.Drawing.Point(390, 20)
             Me.pnlLoginCard.Name = "pnlLoginCard"
             Me.pnlLoginCard.Padding = New System.Windows.Forms.Padding(36)
             Me.pnlLoginCard.Size = New System.Drawing.Size(510, 509)
             Me.pnlLoginCard.TabIndex = 1
             '
-            'btnStudentRegister
+            'btnBackToChooser
             '
-            Me.btnStudentRegister.BackColor = System.Drawing.Color.Transparent
-            Me.btnStudentRegister.CornerRadius = 12
-            Me.btnStudentRegister.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
-            Me.btnStudentRegister.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.btnStudentRegister.HoverColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
-            Me.btnStudentRegister.Location = New System.Drawing.Point(36, 412)
-            Me.btnStudentRegister.Name = "btnStudentRegister"
-            Me.btnStudentRegister.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(16, Byte), Integer), CType(CType(185, Byte), Integer), CType(CType(129, Byte), Integer))
-            Me.btnStudentRegister.Size = New System.Drawing.Size(438, 38)
-            Me.btnStudentRegister.TabIndex = 9
-            Me.btnStudentRegister.Text = "🎓 New Student? Create Account with DeKUT Email"
+            Me.btnBackToChooser.BackColor = System.Drawing.Color.Transparent
+            Me.btnBackToChooser.CornerRadius = 10
+            Me.btnBackToChooser.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
+            Me.btnBackToChooser.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
+            Me.btnBackToChooser.HoverColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.Location = New System.Drawing.Point(36, 408)
+            Me.btnBackToChooser.Name = "btnBackToChooser"
+            Me.btnBackToChooser.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.Size = New System.Drawing.Size(438, 38)
+            Me.btnBackToChooser.TabIndex = 9
+            Me.btnBackToChooser.Text = "← Back to Portal Selection"
             '
             'btnExitApp
             '
             Me.btnExitApp.BackColor = System.Drawing.Color.Transparent
-            Me.btnExitApp.CornerRadius = 12
+            Me.btnExitApp.CornerRadius = 10
             Me.btnExitApp.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
             Me.btnExitApp.DialogResult = System.Windows.Forms.DialogResult.Cancel
+            Me.btnExitApp.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnExitApp.HoverColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnExitApp.Location = New System.Drawing.Point(36, 458)
+            Me.btnExitApp.Location = New System.Drawing.Point(36, 452)
             Me.btnExitApp.Name = "btnExitApp"
-            Me.btnExitApp.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnExitApp.Size = New System.Drawing.Size(438, 36)
+            Me.btnExitApp.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnExitApp.Size = New System.Drawing.Size(438, 32)
             Me.btnExitApp.TabIndex = 10
             Me.btnExitApp.Text = "Exit Application"
             '
             'btnLogin
             '
             Me.btnLogin.BackColor = System.Drawing.Color.Transparent
-            Me.btnLogin.CornerRadius = 12
-            Me.btnLogin.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(11, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(20, Byte), Integer))
-            Me.btnLogin.HoverColor = System.Drawing.Color.FromArgb(CType(CType(34, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(94, Byte), Integer))
-            Me.btnLogin.Location = New System.Drawing.Point(36, 362)
+            Me.btnLogin.CornerRadius = 10
+            Me.btnLogin.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(7, Byte), Integer), CType(CType(10, Byte), Integer), CType(CType(14, Byte), Integer))
+            Me.btnLogin.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
+            Me.btnLogin.HoverColor = System.Drawing.Color.FromArgb(CType(CType(251, Byte), Integer), CType(CType(191, Byte), Integer), CType(CType(36, Byte), Integer))
+            Me.btnLogin.Location = New System.Drawing.Point(36, 354)
             Me.btnLogin.Name = "btnLogin"
-            Me.btnLogin.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(230, Byte), Integer), CType(CType(118, Byte), Integer))
-            Me.btnLogin.Size = New System.Drawing.Size(438, 42)
+            Me.btnLogin.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(245, Byte), Integer), CType(CType(158, Byte), Integer), CType(CType(11, Byte), Integer))
+            Me.btnLogin.Size = New System.Drawing.Size(438, 44)
             Me.btnLogin.TabIndex = 8
-            Me.btnLogin.Text = "Sign In"
+            Me.btnLogin.Text = "Sign In to Admin Console"
             '
             'lblStatusMessage
             '
             Me.lblStatusMessage.BackColor = System.Drawing.Color.Transparent
             Me.lblStatusMessage.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblStatusMessage.ForeColor = System.Drawing.Color.FromArgb(CType(CType(239, Byte), Integer), CType(CType(68, Byte), Integer), CType(CType(68, Byte), Integer))
-            Me.lblStatusMessage.Location = New System.Drawing.Point(36, 318)
+            Me.lblStatusMessage.Location = New System.Drawing.Point(36, 312)
             Me.lblStatusMessage.Name = "lblStatusMessage"
-            Me.lblStatusMessage.Size = New System.Drawing.Size(438, 38)
+            Me.lblStatusMessage.Size = New System.Drawing.Size(438, 34)
             Me.lblStatusMessage.TabIndex = 7
             Me.lblStatusMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             '
             'txtPassword
             '
             Me.txtPassword.BackColor = System.Drawing.Color.Transparent
-            Me.txtPassword.CornerRadius = 12
+            Me.txtPassword.CornerRadius = 10
             Me.txtPassword.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.txtPassword.IsPassword = True
             Me.txtPassword.LeadingIconText = "🔑"
-            Me.txtPassword.Location = New System.Drawing.Point(36, 260)
+            Me.txtPassword.Location = New System.Drawing.Point(36, 258)
             Me.txtPassword.MinimumSize = New System.Drawing.Size(120, 38)
             Me.txtPassword.Name = "txtPassword"
-            Me.txtPassword.PlaceholderText = "Enter secure password"
+            Me.txtPassword.PlaceholderText = "Enter administrative password"
             Me.txtPassword.Size = New System.Drawing.Size(438, 44)
             Me.txtPassword.TabIndex = 5
             Me.txtPassword.TextValue = ""
@@ -329,7 +332,7 @@ Namespace Forms
             Me.lblPasswordTitle.BackColor = System.Drawing.Color.Transparent
             Me.lblPasswordTitle.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblPasswordTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
-            Me.lblPasswordTitle.Location = New System.Drawing.Point(36, 236)
+            Me.lblPasswordTitle.Location = New System.Drawing.Point(36, 234)
             Me.lblPasswordTitle.Name = "lblPasswordTitle"
             Me.lblPasswordTitle.Size = New System.Drawing.Size(57, 15)
             Me.lblPasswordTitle.TabIndex = 4
@@ -338,14 +341,14 @@ Namespace Forms
             'txtUsername
             '
             Me.txtUsername.BackColor = System.Drawing.Color.Transparent
-            Me.txtUsername.CornerRadius = 12
+            Me.txtUsername.CornerRadius = 10
             Me.txtUsername.Font = New System.Drawing.Font("Segoe UI", 10.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.txtUsername.IsPassword = False
             Me.txtUsername.LeadingIconText = "👤"
-            Me.txtUsername.Location = New System.Drawing.Point(36, 175)
+            Me.txtUsername.Location = New System.Drawing.Point(36, 172)
             Me.txtUsername.MinimumSize = New System.Drawing.Size(120, 38)
             Me.txtUsername.Name = "txtUsername"
-            Me.txtUsername.PlaceholderText = "Staff username or Student email (@students.dkut.ac.ke)"
+            Me.txtUsername.PlaceholderText = "Staff username (e.g. accomm_officer, bursar)"
             Me.txtUsername.Size = New System.Drawing.Size(438, 44)
             Me.txtUsername.TabIndex = 3
             Me.txtUsername.TextValue = ""
@@ -356,11 +359,11 @@ Namespace Forms
             Me.lblUsernameTitle.BackColor = System.Drawing.Color.Transparent
             Me.lblUsernameTitle.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblUsernameTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
-            Me.lblUsernameTitle.Location = New System.Drawing.Point(36, 150)
+            Me.lblUsernameTitle.Location = New System.Drawing.Point(36, 148)
             Me.lblUsernameTitle.Name = "lblUsernameTitle"
-            Me.lblUsernameTitle.Size = New System.Drawing.Size(155, 15)
+            Me.lblUsernameTitle.Size = New System.Drawing.Size(87, 15)
             Me.lblUsernameTitle.TabIndex = 2
-            Me.lblUsernameTitle.Text = "Username or Student Email"
+            Me.lblUsernameTitle.Text = "Staff Username"
             '
             'lblSignInSub
             '
@@ -371,8 +374,8 @@ Namespace Forms
             Me.lblSignInSub.Name = "lblSignInSub"
             Me.lblSignInSub.Size = New System.Drawing.Size(438, 45)
             Me.lblSignInSub.TabIndex = 1
-            Me.lblSignInSub.Text = "Please enter your administrative credentials to access accommodation and billing " &
-    "records."
+            Me.lblSignInSub.Text = "Please enter your administrative staff credentials to access accommodation and bi" &
+    "lling records."
             '
             'lblSignInHeader
             '
@@ -382,9 +385,9 @@ Namespace Forms
             Me.lblSignInHeader.ForeColor = System.Drawing.Color.FromArgb(CType(CType(248, Byte), Integer), CType(CType(250, Byte), Integer), CType(CType(252, Byte), Integer))
             Me.lblSignInHeader.Location = New System.Drawing.Point(36, 35)
             Me.lblSignInHeader.Name = "lblSignInHeader"
-            Me.lblSignInHeader.Size = New System.Drawing.Size(262, 32)
+            Me.lblSignInHeader.Size = New System.Drawing.Size(350, 32)
             Me.lblSignInHeader.TabIndex = 0
-            Me.lblSignInHeader.Text = "Staff Authentication"
+            Me.lblSignInHeader.Text = "Staff Administration Gateway"
             '
             'frmLogin
             '
@@ -401,7 +404,7 @@ Namespace Forms
             Me.KeyPreview = True
             Me.Name = "frmLogin"
             Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-            Me.Text = "University Hostel Management - Sign In"
+            Me.Text = "University Hostel Management - Staff Gateway"
             Me.pnlHeader.ResumeLayout(False)
             Me.pnlHeader.PerformLayout()
             Me.pnlRootAmbient.ResumeLayout(False)
@@ -438,7 +441,7 @@ Namespace Forms
         Friend WithEvents txtPassword As University_hostel_mgt.Controls.GlassTextBox
         Friend WithEvents lblStatusMessage As System.Windows.Forms.Label
         Friend WithEvents btnLogin As University_hostel_mgt.Controls.GlassButton
-        Friend WithEvents btnStudentRegister As University_hostel_mgt.Controls.GlassButton
+        Friend WithEvents btnBackToChooser As University_hostel_mgt.Controls.GlassButton
         Friend WithEvents btnExitApp As University_hostel_mgt.Controls.GlassButton
     End Class
 End Namespace

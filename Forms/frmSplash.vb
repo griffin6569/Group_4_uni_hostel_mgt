@@ -231,10 +231,10 @@ Namespace Forms
             _initComplete = True
             tmrAnimation.Stop()
 
-            ' Smooth transition to frmLogin
+            ' Smooth transition to frmPortalChooser
             Me.Hide()
-            Dim loginForm As New frmLogin()
-            loginForm.Show()
+            Dim chooser As New frmPortalChooser()
+            chooser.Show()
         End Sub
 
         Private Sub UpdateStatus(statusMessage As String, targetPercent As Single)
