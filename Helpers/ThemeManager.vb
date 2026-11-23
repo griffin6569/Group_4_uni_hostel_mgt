@@ -1,6 +1,9 @@
 Imports System
+Imports System.Collections.Generic
 Imports System.Drawing
 Imports System.Drawing.Drawing2D
+Imports System.Drawing.Text
+Imports System.IO
 Imports System.Reflection
 Imports System.Windows.Forms
 
@@ -82,14 +85,183 @@ Namespace Helpers
         Public Shared ReadOnly GlassStatusInfoBg As Color = Color.FromArgb(35, 56, 189, 248)
         Public Shared ReadOnly AccentSapphire As Color = Color.FromArgb(56, 189, 248)       ' Sapphire Ice Accent
 
+        ' =========================================================================
+        ' DYNAMIC HIGH-END TYPOGRAPHY SYSTEM (Apple SF Pro / Segoe UI Variable)
+        ' =========================================================================
+        Private Shared ReadOnly _privateFonts As New PrivateFontCollection()
+        Private Shared ReadOnly _fontCache As New Dictionary(Of String, Font)(StringComparer.OrdinalIgnoreCase)
+
+        Public Shared ReadOnly Property ActiveDisplayFontFamily As String
+        Public Shared ReadOnly Property ActiveBodyFontFamily As String
+        Public Shared ReadOnly Property ActiveSmallFontFamily As String
+        Public Shared ReadOnly Property ActiveMonoFontFamily As String
+
         ' Display & Widget Typography Standards
-        Public Shared ReadOnly DisplayFont As New Font("Segoe UI", 20.0F, FontStyle.Bold)
-        Public Shared ReadOnly KpiNumberFont As New Font("Segoe UI", 18.0F, FontStyle.Bold)
-        Public Shared ReadOnly KpiMoneyFont As New Font("Consolas", 16.5F, FontStyle.Bold)
-        Public Shared ReadOnly KpiLabelFont As New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold)
-        Public Shared ReadOnly KpiSubFont As New Font("Segoe UI", 8.0F, FontStyle.Regular)
-        Public Shared ReadOnly FontSmallBold As New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold)
-        Public Shared ReadOnly FontSmall As New Font("Segoe UI", 8.5F, FontStyle.Regular)
+        Public Shared ReadOnly DisplayFont As Font
+        Public Shared ReadOnly TitleFont As Font
+        Public Shared ReadOnly HeadingFont As Font
+        Public Shared ReadOnly SubheadingFont As Font
+        Public Shared ReadOnly BodyFont As Font
+        Public Shared ReadOnly SmallFont As Font
+        Public Shared ReadOnly FontSmallBold As Font
+        Public Shared ReadOnly FontSmall As Font
+        Public Shared ReadOnly KpiNumberFont As Font
+        Public Shared ReadOnly KpiMoneyFont As Font
+        Public Shared ReadOnly KpiLabelFont As Font
+        Public Shared ReadOnly KpiSubFont As Font
+        Public Shared ReadOnly MonoFont As Font
+        Public Shared ReadOnly MonoBoldFont As Font
+
+        Shared Sub New()
+            LoadCustomPrivateFonts()
+            ActiveDisplayFontFamily = ResolveFontFamily({"SF Pro Display", "SF Pro", "San Francisco", "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI"})
+            ActiveBodyFontFamily = ResolveFontFamily({"SF Pro Text", "SF Pro", "San Francisco", "Segoe UI Variable Text", "Segoe UI Semibold", "Segoe UI"})
+            ActiveSmallFontFamily = ResolveFontFamily({"SF Pro Text", "SF Pro", "Segoe UI Variable Small", "Segoe UI Variable Text", "Segoe UI"})
+            ActiveMonoFontFamily = ResolveFontFamily({"SF Mono", "Cascadia Code", "Cascadia Mono", "Consolas"})
+
+            DisplayFont = GetFont(ActiveDisplayFontFamily, 20.0F, FontStyle.Bold)
+            TitleFont = GetFont(ActiveDisplayFontFamily, 16.0F, FontStyle.Bold)
+            HeadingFont = GetFont(ActiveDisplayFontFamily, 12.5F, FontStyle.Bold)
+            SubheadingFont = GetFont(ActiveBodyFontFamily, 10.5F, FontStyle.Bold)
+            BodyFont = GetFont(ActiveBodyFontFamily, 9.5F, FontStyle.Regular)
+            SmallFont = GetFont(ActiveSmallFontFamily, 8.5F, FontStyle.Regular)
+            FontSmallBold = GetFont(ActiveSmallFontFamily, 8.5F, FontStyle.Bold)
+            FontSmall = GetFont(ActiveSmallFontFamily, 8.5F, FontStyle.Regular)
+            KpiNumberFont = GetFont(ActiveDisplayFontFamily, 18.0F, FontStyle.Bold)
+            KpiMoneyFont = GetFont(ActiveMonoFontFamily, 15.5F, FontStyle.Bold)
+            KpiLabelFont = GetFont(ActiveSmallFontFamily, 8.5F, FontStyle.Bold)
+            KpiSubFont = GetFont(ActiveSmallFontFamily, 8.0F, FontStyle.Regular)
+            MonoFont = GetFont(ActiveMonoFontFamily, 10.0F, FontStyle.Regular)
+            MonoBoldFont = GetFont(ActiveMonoFontFamily, 10.5F, FontStyle.Bold)
+        End Sub
+
+        Private Shared Sub LoadCustomPrivateFonts()
+            Try
+                Dim fontDirs As String() = {
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Fonts"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts"),
+                    Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Fonts")
+                }
+                For Each fDir As String In fontDirs
+                    If Directory.Exists(fDir) Then
+                        For Each fontFile As String In Directory.GetFiles(fDir, "*.*")
+                            Dim ext = Path.GetExtension(fontFile).ToLowerInvariant()
+                            If ext = ".ttf" OrElse ext = ".otf" Then
+                                Try
+                                    _privateFonts.AddFontFile(fontFile)
+                                Catch
+                                End Try
+                            End If
+                        Next
+                    End If
+                Next
+            Catch
+            End Try
+        End Sub
+
+        Public Shared Function ResolveFontFamily(candidateNames As String()) As String
+            ' 1. Check if loaded in PrivateFontCollection (e.g. Apple SF Pro OTF/TTF files in Assets/Fonts)
+            For Each candidate In candidateNames
+                For Each pf In _privateFonts.Families
+                    If String.Equals(pf.Name, candidate, StringComparison.OrdinalIgnoreCase) Then
+                        Return pf.Name
+                    End If
+                Next
+            Next
+
+            ' 2. Check Installed System Fonts
+            For Each candidate In candidateNames
+                Try
+                    Using fam As New FontFamily(candidate)
+                        Using testFont As New Font(fam, 10.0F)
+                            If String.Equals(testFont.Name, candidate, StringComparison.OrdinalIgnoreCase) Then
+                                Return candidate
+                            End If
+                        End Using
+                    End Using
+                Catch
+                End Try
+            Next
+
+            Return "Segoe UI"
+        End Function
+
+        Public Shared Function GetFont(family As String, size As Single, Optional style As FontStyle = FontStyle.Regular) As Font
+            Dim key = $"{family}_{size}_{style}"
+            SyncLock _fontCache
+                If _fontCache.ContainsKey(key) Then
+                    Return _fontCache(key)
+                End If
+
+                Dim createdFont As Font = Nothing
+                ' Check PrivateFontCollection first
+                For Each pf In _privateFonts.Families
+                    If String.Equals(pf.Name, family, StringComparison.OrdinalIgnoreCase) Then
+                        createdFont = New Font(pf, size, style)
+                        Exit For
+                    End If
+                Next
+
+                If createdFont Is Nothing Then
+                    Try
+                        createdFont = New Font(family, size, style)
+                    Catch
+                        createdFont = New Font("Segoe UI", size, style)
+                    End Try
+                End If
+
+                _fontCache(key) = createdFont
+                Return createdFont
+            End SyncLock
+        End Function
+
+        Public Shared Function GetDisplayFont(size As Single, Optional style As FontStyle = FontStyle.Bold) As Font
+            Return GetFont(ActiveDisplayFontFamily, size, style)
+        End Function
+
+        Public Shared Function GetBodyFont(size As Single, Optional style As FontStyle = FontStyle.Regular) As Font
+            Return GetFont(ActiveBodyFontFamily, size, style)
+        End Function
+
+        Public Shared Function GetSmallFont(size As Single, Optional style As FontStyle = FontStyle.Regular) As Font
+            Return GetFont(ActiveSmallFontFamily, size, style)
+        End Function
+
+        Public Shared Function GetMonoFont(size As Single, Optional style As FontStyle = FontStyle.Regular) As Font
+            Return GetFont(ActiveMonoFontFamily, size, style)
+        End Function
+
+        ''' <summary>
+        ''' Recursively traverses a control tree and applies optical variable typography standards.
+        ''' </summary>
+        Public Shared Sub ApplyTypography(rootControl As Control)
+            If rootControl Is Nothing Then Return
+
+            For Each ctrl As Control In rootControl.Controls
+                Dim curSize As Single = ctrl.Font.Size
+                Dim curStyle As FontStyle = ctrl.Font.Style
+
+                If TypeOf ctrl Is Label Then
+                    If curSize >= 13.0F Then
+                        ctrl.Font = GetDisplayFont(curSize, curStyle)
+                    ElseIf curSize <= 8.8F Then
+                        ctrl.Font = GetSmallFont(curSize, curStyle)
+                    Else
+                        ctrl.Font = GetBodyFont(curSize, curStyle)
+                    End If
+                ElseIf TypeOf ctrl Is Button Then
+                    ctrl.Font = GetBodyFont(curSize, curStyle)
+                ElseIf TypeOf ctrl Is TextBox Then
+                    ctrl.Font = GetBodyFont(curSize, curStyle)
+                ElseIf TypeOf ctrl Is ComboBox Then
+                    ctrl.Font = GetBodyFont(curSize, curStyle)
+                End If
+
+                If ctrl.HasChildren Then
+                    ApplyTypography(ctrl)
+                End If
+            Next
+        End Sub
 
         ' =========================================================================
         ' 3. LEGACY COMPATIBILITY TOKENS
@@ -113,15 +285,6 @@ Namespace Helpers
         Public Shared ReadOnly TextPrimary As Color = Color.FromArgb(248, 250, 252)  ' #F8FAFC
         Public Shared ReadOnly TextSecondary As Color = Color.FromArgb(148, 163, 184)' #94A3B8
         Public Shared ReadOnly TextMuted As Color = Color.FromArgb(100, 116, 139)    ' #64748B
-
-        ' Typography Standard
-        Public Shared ReadOnly TitleFont As New Font("Segoe UI", 16.0F, FontStyle.Bold)
-        Public Shared ReadOnly HeadingFont As New Font("Segoe UI", 12.0F, FontStyle.Bold)
-        Public Shared ReadOnly SubheadingFont As New Font("Segoe UI Semibold", 10.5F, FontStyle.Bold)
-        Public Shared ReadOnly BodyFont As New Font("Segoe UI", 9.5F, FontStyle.Regular)
-        Public Shared ReadOnly SmallFont As New Font("Segoe UI", 8.5F, FontStyle.Regular)
-        Public Shared ReadOnly MonoFont As New Font("Consolas", 10.0F, FontStyle.Regular)
-        Public Shared ReadOnly MonoBoldFont As New Font("Consolas", 10.5F, FontStyle.Bold)
 
         ''' <summary>
         ''' Enables double-buffering on any Control using reflection to eliminate flicker.

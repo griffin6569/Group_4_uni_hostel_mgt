@@ -29,6 +29,7 @@ Namespace Forms.StudentPortal
 
             picBrandLogo.Image = ThemeManager.GetInstitutionalLogo()
             lblDbStatusText.Text = $"Database: Connected [{DbConfig.Database}]"
+            ThemeManager.ApplyTypography(Me)
             txtIdentifier.Select()
         End Sub
 

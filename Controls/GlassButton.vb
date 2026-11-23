@@ -24,6 +24,8 @@ Namespace Controls
         Private _hoverColor As Color = Color.FromArgb(34, 197, 94)         ' Bright Emerald
         Private _pressedColor As Color = Color.FromArgb(16, 185, 129)      ' Dark Emerald
         Private _textColor As Color = Color.FromArgb(11, 15, 20)           ' Dark Text for contrast
+        Private _borderColor As Color = Color.FromArgb(60, 255, 255, 255)  ' Frosted Specular Border
+        Private _hoverBorderColor As Color = Color.FromArgb(130, 255, 255, 255) ' Hover Specular Border
 
         Public Sub New()
             MyBase.New()
@@ -84,6 +86,28 @@ Namespace Controls
             End Get
             Set(value As Color)
                 _textColor = value
+                Me.Invalidate()
+            End Set
+        End Property
+
+        <Category("Glassmorphism")>
+        Public Property BorderColor As Color
+            Get
+                Return _borderColor
+            End Get
+            Set(value As Color)
+                _borderColor = value
+                Me.Invalidate()
+            End Set
+        End Property
+
+        <Category("Glassmorphism")>
+        Public Property HoverBorderColor As Color
+            Get
+                Return _hoverBorderColor
+            End Get
+            Set(value As Color)
+                _hoverBorderColor = value
                 Me.Invalidate()
             End Set
         End Property
@@ -220,8 +244,9 @@ Namespace Controls
                     End Using
                 End Using
 
-                ' 4. Crisp Border
-                Using borderPen As New Pen(Color.FromArgb(100, 255, 255, 255), 1.0F)
+                ' 4. Crisp Border with Dynamic State Interpolation
+                Dim curBorderColor As Color = InterpolateColor(_borderColor, _hoverBorderColor, _hoverProgress)
+                Using borderPen As New Pen(curBorderColor, 1.0F)
                     g.DrawPath(borderPen, path)
                 End Using
 
@@ -237,10 +262,11 @@ Namespace Controls
 
         Private Function InterpolateColor(c1 As Color, c2 As Color, factor As Single) As Color
             Dim f As Single = Math.Max(0.0F, Math.Min(1.0F, factor))
+            Dim a As Integer = Math.Min(255, Math.Max(0, CInt(CInt(c1.A) + (CInt(c2.A) - CInt(c1.A)) * f)))
             Dim r As Integer = Math.Min(255, Math.Max(0, CInt(CInt(c1.R) + (CInt(c2.R) - CInt(c1.R)) * f)))
             Dim g As Integer = Math.Min(255, Math.Max(0, CInt(CInt(c1.G) + (CInt(c2.G) - CInt(c1.G)) * f)))
             Dim b As Integer = Math.Min(255, Math.Max(0, CInt(CInt(c1.B) + (CInt(c2.B) - CInt(c1.B)) * f)))
-            Return Color.FromArgb(255, r, g, b)
+            Return Color.FromArgb(a, r, g, b)
         End Function
 
         Private Function GetRoundedPath(rect As RectangleF, radius As Single) As GraphicsPath

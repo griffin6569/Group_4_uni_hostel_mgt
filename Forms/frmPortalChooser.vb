@@ -24,6 +24,7 @@ Namespace Forms
 
             picLogo.Image = ThemeManager.GetInstitutionalLogo()
             lblDbText.Text = $"Database: Connected [{DbConfig.Database}]"
+            ThemeManager.ApplyTypography(Me)
         End Sub
 
         ' 1. Header Dragging

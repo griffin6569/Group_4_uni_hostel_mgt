@@ -32,6 +32,9 @@ Namespace Forms
             ' Display active database status
             lblDbStatusText.Text = $"Database: Connected [{DbConfig.Database}]"
 
+            ' Apply Apple/Segoe UI Variable typography hierarchy
+            ThemeManager.ApplyTypography(Me)
+
             ' Focus username input
             txtUsername.Select()
         End Sub
