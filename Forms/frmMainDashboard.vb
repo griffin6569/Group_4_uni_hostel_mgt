@@ -1,0 +1,357 @@
+Imports System
+Imports System.Collections.Generic
+Imports System.Drawing
+Imports System.Drawing.Drawing2D
+Imports System.Windows.Forms
+Imports University_hostel_mgt.Controls.Views
+Imports University_hostel_mgt.Data.Repositories
+Imports University_hostel_mgt.Helpers
+Imports University_hostel_mgt.Models
+
+Namespace Forms
+    ''' <summary>
+    ''' Central Executive Dashboard and Navigation Hub for the University Hostel Management System.
+    ''' Adheres strictly to the Prestige Academic & Executive Design System.
+    ''' </summary>
+    Public Class frmMainDashboard
+        Private ReadOnly _currentUser As User
+        Private ReadOnly _semesterRepo As New SemesterRepository()
+
+        Private _activeNavButton As Button = Nothing
+        Private _currentSemesterId As Integer = 0
+
+        ' View Controls
+        Private _viewDashboard As DashboardOverviewControl
+        Private _viewStudents As StudentsControl
+        Private _viewHostels As HostelsControl
+        Private _viewRooms As RoomsControl
+        Private _viewBeds As BedsControl
+        Private _viewAllocations As AllocationsControl
+        Private _viewBilling As BillingControl
+        Private _viewReports As PlaceholderControl
+        Private _viewUsers As PlaceholderControl
+
+        Private Structure SemesterItem
+            Public Property Id As Integer
+            Public Property Name As String
+            Public Property IsCurrent As Boolean
+
+            Public Overrides Function ToString() As String
+                Return If(IsCurrent, $"★ {Name} (ACTIVE)", Name)
+            End Function
+        End Structure
+
+        Public Sub New(Optional user As User = Nothing)
+            InitializeComponent()
+            ThemeManager.EnableDoubleBuffering(Me)
+            ThemeManager.EnableDoubleBuffering(pnlContentHost)
+
+            If user IsNot Nothing Then
+                _currentUser = user
+            Else
+                _currentUser = New User With {
+                    .UserId = 1,
+                    .FullName = "Dr. Arthur Pendelton",
+                    .Username = "admin",
+                    .RoleName = Role.SuperAdmin,
+                    .AccountStatus = "ACTIVE"
+                }
+            End If
+
+            ConfigureUserProfile()
+            PaintAcademicCrest()
+            InitializeViews()
+            LoadSemesters()
+
+            ' Default to Dashboard View
+            SwitchView("DASHBOARD", btnNavDashboard)
+        End Sub
+
+        Private Sub ConfigureUserProfile()
+            lblUserName.Text = _currentUser.FullName
+            lblUserRole.Text = _currentUser.RoleName.ToUpperInvariant()
+
+            ' Monogram Initials
+            Dim initials As String = "U"
+            If Not String.IsNullOrWhiteSpace(_currentUser.FullName) Then
+                Dim parts = _currentUser.FullName.Split(" "c, StringSplitOptions.RemoveEmptyEntries)
+                If parts.Length >= 2 Then
+                    initials = $"{parts(0)(0)}{parts(parts.Length - 1)(0)}".ToUpperInvariant()
+                ElseIf parts.Length = 1 Then
+                    initials = parts(0).Substring(0, Math.Min(2, parts(0).Length)).ToUpperInvariant()
+                End If
+            End If
+            lblUserInitials.Text = initials
+
+            ' Role-based permission gating
+            If Not _currentUser.CanManageUsers Then
+                btnNavUsers.Visible = False
+            End If
+        End Sub
+
+        Private Sub PaintAcademicCrest()
+            Dim bmp As New Bitmap(picCrest.Width, picCrest.Height)
+            Using g As Graphics = Graphics.FromImage(bmp)
+                Dim crestRect As New RectangleF(2, 2, picCrest.Width - 4, picCrest.Height - 4)
+                ThemeManager.DrawAcademicCrest(g, crestRect, ThemeManager.AcademicGold, ThemeManager.NavyPrimary)
+            End Using
+            picCrest.Image = bmp
+        End Sub
+
+        Private Sub InitializeViews()
+            ' 1. Dashboard View
+            _viewDashboard = New DashboardOverviewControl()
+            AddHandler _viewDashboard.RequestNewBed, Sub() SwitchView("BEDS", btnNavBeds, Sub() _viewBeds.OpenNewBedModal())
+            AddHandler _viewDashboard.RequestNewStudent, Sub() SwitchView("STUDENTS", btnNavStudents, Sub() _viewStudents.OpenNewStudentModal())
+            AddHandler _viewDashboard.RequestNewRoom, Sub() SwitchView("ROOMS", btnNavRooms, Sub() _viewRooms.OpenNewRoomModal())
+            AddHandler _viewDashboard.RequestNewHostel, Sub() SwitchView("HOSTELS", btnNavHostels, Sub() _viewHostels.OpenNewHostelModal())
+
+            ' 2. Students View
+            _viewStudents = New StudentsControl()
+
+            ' 3. Hostels View
+            _viewHostels = New HostelsControl()
+
+            ' 4. Rooms View
+            _viewRooms = New RoomsControl()
+
+            ' 5. Beds View
+            _viewBeds = New BedsControl()
+
+            ' 6. Allocations View (Phase 4 Live Module)
+            _viewAllocations = New AllocationsControl(_currentUser.UserId)
+
+            ' 7. Billing View (Phase 4 Live Module)
+            _viewBilling = New BillingControl(_currentUser.UserId)
+
+            ' 8. Placeholders for upcoming Phase 5
+            _viewReports = New PlaceholderControl(
+                "Phase 5 — Reporting & Analytics",
+                "Executive Accommodation & Financial Reports",
+                "Exportable PDF and structured reports for university councils, registrars, and bursars.",
+                "• Hostel Occupancy & Vacancy Breakdown Reports." & vbCrLf &
+                "• Semester Revenue & Arrears Aging Schedules." & vbCrLf &
+                "• Maintenance Incidence & Bed Downtime Analytics." & vbCrLf &
+                "• Student Accommodation History & Clearance Certificates."
+            )
+
+            _viewUsers = New PlaceholderControl(
+                "Phase 5 — System Administration",
+                "Staff Role-Based Access Control & User Administration",
+                "Manage university accommodation and bursary staff credentials, roles, and security policies.",
+                "• PBKDF2 Password Hashing with unique cryptographically random salts." & vbCrLf &
+                "• Granular RBAC permissions: SUPER_ADMIN, ADMIN, ACCOMMODATION_OFFICER, FINANCE_OFFICER." & vbCrLf &
+                "• Complete Activity Audit Trails capturing logins, allocations, rate changes, and refunds."
+            )
+
+            ' Add all views to pnlContentHost
+            pnlContentHost.Controls.AddRange({
+                _viewDashboard,
+                _viewStudents,
+                _viewHostels,
+                _viewRooms,
+                _viewBeds,
+                _viewAllocations,
+                _viewBilling,
+                _viewReports,
+                _viewUsers
+            })
+        End Sub
+
+        Private Sub LoadSemesters()
+            cboSemester.Items.Clear()
+            Dim semesters = _semesterRepo.GetSemesters()
+
+            Dim selectedIndex As Integer = 0
+            For i As Integer = 0 To semesters.Count - 1
+                Dim s = semesters(i)
+                Dim item As New SemesterItem With {
+                    .Id = s.SemesterId,
+                    .Name = s.SemesterName,
+                    .IsCurrent = s.IsCurrent
+                }
+                cboSemester.Items.Add(item)
+                If s.IsCurrent Then
+                    selectedIndex = i
+                    _currentSemesterId = s.SemesterId
+                End If
+            Next
+
+            If cboSemester.Items.Count > 0 Then
+                cboSemester.SelectedIndex = selectedIndex
+            End If
+        End Sub
+
+        Private Sub cboSemester_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboSemester.SelectedIndexChanged
+            If cboSemester.SelectedItem IsNot Nothing Then
+                Dim item = DirectCast(cboSemester.SelectedItem, SemesterItem)
+                _currentSemesterId = item.Id
+                RefreshActiveView()
+            End If
+        End Sub
+
+        Private Sub SwitchView(viewTag As String, navButton As Button, Optional postNavAction As Action = Nothing)
+            ' Highlight Nav Button
+            If _activeNavButton IsNot Nothing Then
+                _activeNavButton.BackColor = Color.Transparent
+                _activeNavButton.ForeColor = Color.FromArgb(203, 213, 225)
+            End If
+
+            _activeNavButton = navButton
+            If _activeNavButton IsNot Nothing Then
+                _activeNavButton.BackColor = ThemeManager.NavyLight
+                _activeNavButton.ForeColor = Color.White
+            End If
+
+            ' Hide all views
+            _viewDashboard.Visible = False
+            _viewStudents.Visible = False
+            _viewHostels.Visible = False
+            _viewRooms.Visible = False
+            _viewBeds.Visible = False
+            _viewAllocations.Visible = False
+            _viewBilling.Visible = False
+            _viewReports.Visible = False
+            _viewUsers.Visible = False
+
+            Select Case viewTag.ToUpperInvariant()
+                Case "DASHBOARD"
+                    lblViewTitle.Text = "Executive Dashboard Overview"
+                    lblViewSub.Text = "Real-Time Campus Accommodation Operations & Financial Health"
+                    _viewDashboard.Visible = True
+                    _viewDashboard.BringToFront()
+                    _viewDashboard.LoadDashboardData(_currentSemesterId)
+
+                Case "STUDENTS"
+                    lblViewTitle.Text = "Student Residents Directory"
+                    lblViewSub.Text = "Manage Student Registrations, Academic Profiles & Bed Occupancy"
+                    _viewStudents.Visible = True
+                    _viewStudents.BringToFront()
+                    _viewStudents.LoadStudentsData()
+
+                Case "HOSTELS"
+                    lblViewTitle.Text = "Hostel Facilities & Buildings"
+                    lblViewSub.Text = "Hostel Structural Configurations, Zones & Capacity Allocations"
+                    _viewHostels.Visible = True
+                    _viewHostels.BringToFront()
+                    _viewHostels.LoadHostelsData()
+
+                Case "ROOMS"
+                    lblViewTitle.Text = "Hostel Rooms & Bed Capacities"
+                    lblViewSub.Text = "Floor Elevations, Room Types & Capacity Ceiling Enforcement"
+                    _viewRooms.Visible = True
+                    _viewRooms.BringToFront()
+                    _viewRooms.LoadRoomsData()
+
+                Case "BEDS"
+                    lblViewTitle.Text = "Bed Space Matrix & Semester Rates"
+                    lblViewSub.Text = "Fundamental Individual Bed Units, Rates, Amenities & Status Tracking"
+                    _viewBeds.Visible = True
+                    _viewBeds.BringToFront()
+                    _viewBeds.LoadBedsData()
+
+                Case "ALLOCATIONS"
+                    lblViewTitle.Text = "Bed Allocation Management"
+                    lblViewSub.Text = "Active Semester Bed Assignment, Rate Freezing, Check-In & Transfers"
+                    _viewAllocations.Visible = True
+                    _viewAllocations.BringToFront()
+                    _viewAllocations.LoadAllocationsData()
+
+                Case "BILLING"
+                    lblViewTitle.Text = "Bursar & Payment Ledger"
+                    lblViewSub.Text = "Student Accommodation Fee Collection, Electronic Receipts & Arrears"
+                    _viewBilling.Visible = True
+                    _viewBilling.BringToFront()
+                    _viewBilling.LoadBillingData()
+
+                Case "REPORTS"
+                    lblViewTitle.Text = "Institutional Reports & Analytics"
+                    lblViewSub.Text = "Phase 5 — Occupancy Schedules, Arrears Aging & Audits"
+                    _viewReports.Visible = True
+                    _viewReports.BringToFront()
+
+                Case "USERS"
+                    lblViewTitle.Text = "System User Administration"
+                    lblViewSub.Text = "Phase 5 — Staff Accounts, Security Roles & Audit Trails"
+                    _viewUsers.Visible = True
+                    _viewUsers.BringToFront()
+            End Select
+
+            If postNavAction IsNot Nothing Then
+                postNavAction.Invoke()
+            End If
+        End Sub
+
+        Private Sub RefreshActiveView()
+            If _viewDashboard.Visible Then
+                _viewDashboard.LoadDashboardData(_currentSemesterId)
+            ElseIf _viewStudents.Visible Then
+                _viewStudents.LoadStudentsData()
+            ElseIf _viewHostels.Visible Then
+                _viewHostels.LoadHostelsData()
+            ElseIf _viewRooms.Visible Then
+                _viewRooms.LoadRoomsData()
+            ElseIf _viewBeds.Visible Then
+                _viewBeds.LoadBedsData()
+            ElseIf _viewAllocations.Visible Then
+                _viewAllocations.LoadAllocationsData()
+            ElseIf _viewBilling.Visible Then
+                _viewBilling.LoadBillingData()
+            End If
+        End Sub
+
+        ' =========================================================================
+        ' NAVIGATION EVENT HANDLERS
+        ' =========================================================================
+        Private Sub btnNavDashboard_Click(sender As Object, e As EventArgs) Handles btnNavDashboard.Click
+            SwitchView("DASHBOARD", btnNavDashboard)
+        End Sub
+
+        Private Sub btnNavStudents_Click(sender As Object, e As EventArgs) Handles btnNavStudents.Click
+            SwitchView("STUDENTS", btnNavStudents)
+        End Sub
+
+        Private Sub btnNavHostels_Click(sender As Object, e As EventArgs) Handles btnNavHostels.Click
+            SwitchView("HOSTELS", btnNavHostels)
+        End Sub
+
+        Private Sub btnNavRooms_Click(sender As Object, e As EventArgs) Handles btnNavRooms.Click
+            SwitchView("ROOMS", btnNavRooms)
+        End Sub
+
+        Private Sub btnNavBeds_Click(sender As Object, e As EventArgs) Handles btnNavBeds.Click
+            SwitchView("BEDS", btnNavBeds)
+        End Sub
+
+        Private Sub btnNavAllocations_Click(sender As Object, e As EventArgs) Handles btnNavAllocations.Click
+            SwitchView("ALLOCATIONS", btnNavAllocations)
+        End Sub
+
+        Private Sub btnNavBilling_Click(sender As Object, e As EventArgs) Handles btnNavBilling.Click
+            SwitchView("BILLING", btnNavBilling)
+        End Sub
+
+        Private Sub btnNavReports_Click(sender As Object, e As EventArgs) Handles btnNavReports.Click
+            SwitchView("REPORTS", btnNavReports)
+        End Sub
+
+        Private Sub btnNavUsers_Click(sender As Object, e As EventArgs) Handles btnNavUsers.Click
+            SwitchView("USERS", btnNavUsers)
+        End Sub
+
+        Private Sub btnRefreshData_Click(sender As Object, e As EventArgs) Handles btnRefreshData.Click
+            RefreshActiveView()
+        End Sub
+
+        Private Sub tmrClock_Tick(sender As Object, e As EventArgs) Handles tmrClock.Tick
+            lblClock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        End Sub
+
+        Private Sub btnNavLogout_Click(sender As Object, e As EventArgs) Handles btnNavLogout.Click
+            Dim confirm = MessageBox.Show("Are you sure you want to sign out of the accommodation portal?", "Confirm Sign Out", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            If confirm = DialogResult.Yes Then
+                Me.Close()
+            End If
+        End Sub
+    End Class
+End Namespace
