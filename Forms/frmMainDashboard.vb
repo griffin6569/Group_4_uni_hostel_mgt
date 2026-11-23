@@ -61,6 +61,7 @@ Namespace Forms
 
             ConfigureUserProfile()
             PaintAcademicCrest()
+            ApplyFrostedGlassShell()
             InitializeViews()
             LoadSemesters()
 
@@ -181,16 +182,93 @@ Namespace Forms
             End If
         End Sub
 
+        Private Sub ApplyFrostedGlassShell()
+            ' 1. Top Bar Glass Styling
+            pnlTopBar.BackColor = Color.FromArgb(10, 16, 27)
+            lblViewTitle.ForeColor = ThemeManager.TextChalkWhite
+            lblViewSub.ForeColor = ThemeManager.TextMutedSlate
+            lblClock.ForeColor = ThemeManager.TextSilverSlate
+            lblSemesterPrompt.ForeColor = ThemeManager.TextMutedSlate
+
+            cboSemester.BackColor = Color.FromArgb(16, 26, 42)
+            cboSemester.ForeColor = Color.White
+
+            pnlDbStatus.BackColor = Color.FromArgb(12, 36, 41)
+            lblDbStatus.ForeColor = ThemeManager.GlassStatusSuccess
+            dotStatus.BackColor = ThemeManager.GlassStatusSuccess
+
+            btnRefreshData.BackColor = Color.FromArgb(30, 42, 60)
+            btnRefreshData.ForeColor = ThemeManager.TextChalkWhite
+            btnRefreshData.FlatStyle = FlatStyle.Flat
+            btnRefreshData.FlatAppearance.BorderColor = ThemeManager.GlassBorder
+            btnRefreshData.FlatAppearance.BorderSize = 1
+
+            ' 2. Sidebar Glass Refinement
+            pnlSidebar.BackColor = Color.FromArgb(7, 12, 20)
+            pnlBrand.BackColor = Color.FromArgb(5, 9, 16)
+            pnlUserProfile.BackColor = Color.FromArgb(6, 11, 18)
+            lblUserName.ForeColor = ThemeManager.TextPlatinum
+            lblUserRole.ForeColor = ThemeManager.GlassStatusInfo
+            pnlLogout.BackColor = Color.FromArgb(5, 9, 16)
+            btnNavLogout.FlatAppearance.BorderColor = Color.FromArgb(40, 55, 80)
+            btnNavLogout.ForeColor = ThemeManager.TextSilverSlate
+
+            ' 3. Content Host Dark Canvas with Ambient Diffused Orbs
+            pnlContentHost.BackColor = ThemeManager.CanvasDark
+            AddHandler pnlContentHost.Paint, Sub(s, e)
+                                                 Dim g As Graphics = e.Graphics
+                                                 g.SmoothingMode = SmoothingMode.AntiAlias
+                                                 ' Base dark gradient
+                                                 Using baseBrush As New LinearGradientBrush(
+                                                     New Point(0, 0),
+                                                     New Point(pnlContentHost.Width, pnlContentHost.Height),
+                                                     Color.FromArgb(7, 12, 21),
+                                                     Color.FromArgb(12, 20, 34))
+                                                     g.FillRectangle(baseBrush, pnlContentHost.ClientRectangle)
+                                                 End Using
+
+                                                 ' Diffused Sapphire Glow (Top-Right)
+                                                 Dim r1 As Integer = CInt(Math.Min(pnlContentHost.Width, pnlContentHost.Height) * 0.7F)
+                                                 If r1 > 10 Then
+                                                     Dim c1 As New Point(CInt(pnlContentHost.Width * 0.85F), CInt(pnlContentHost.Height * 0.2F))
+                                                     Using pth As New GraphicsPath()
+                                                         pth.AddEllipse(c1.X - r1, c1.Y - r1, r1 * 2, r1 * 2)
+                                                         Using pgb As New PathGradientBrush(pth)
+                                                             pgb.CenterPoint = c1
+                                                             pgb.CenterColor = Color.FromArgb(20, 30, 64, 175)
+                                                             pgb.SurroundColors = New Color() {Color.FromArgb(0, 30, 64, 175)}
+                                                             g.FillPath(pgb, pth)
+                                                         End Using
+                                                     End Using
+                                                 End If
+
+                                                 ' Diffused Gold Glow (Bottom-Left)
+                                                 Dim r2 As Integer = CInt(Math.Min(pnlContentHost.Width, pnlContentHost.Height) * 0.55F)
+                                                 If r2 > 10 Then
+                                                     Dim c2 As New Point(CInt(pnlContentHost.Width * 0.15F), CInt(pnlContentHost.Height * 0.85F))
+                                                     Using pth2 As New GraphicsPath()
+                                                         pth2.AddEllipse(c2.X - r2, c2.Y - r2, r2 * 2, r2 * 2)
+                                                         Using pgb2 As New PathGradientBrush(pth2)
+                                                             pgb2.CenterPoint = c2
+                                                             pgb2.CenterColor = Color.FromArgb(14, 217, 119, 6)
+                                                             pgb2.SurroundColors = New Color() {Color.FromArgb(0, 217, 119, 6)}
+                                                             g.FillPath(pgb2, pth2)
+                                                         End Using
+                                                     End Using
+                                                 End If
+                                             End Sub
+        End Sub
+
         Private Sub SwitchView(viewTag As String, navButton As Button, Optional postNavAction As Action = Nothing)
             ' Highlight Nav Button
             If _activeNavButton IsNot Nothing Then
-                _activeNavButton.BackColor = Color.Transparent
-                _activeNavButton.ForeColor = Color.FromArgb(203, 213, 225)
+                _activeNavButton.BackColor = Color.FromArgb(7, 12, 20)
+                _activeNavButton.ForeColor = Color.FromArgb(148, 163, 184)
             End If
 
             _activeNavButton = navButton
             If _activeNavButton IsNot Nothing Then
-                _activeNavButton.BackColor = ThemeManager.NavyLight
+                _activeNavButton.BackColor = Color.FromArgb(30, 58, 138)
                 _activeNavButton.ForeColor = Color.White
             End If
 
