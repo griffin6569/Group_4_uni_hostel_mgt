@@ -252,30 +252,30 @@ Namespace Forms.StudentPortal
             '
             'btnBackToChooser
             '
-            Me.btnBackToChooser.BorderColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.BorderColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.btnBackToChooser.CornerRadius = 9
-            Me.btnBackToChooser.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
+            Me.btnBackToChooser.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(226, Byte), Integer), CType(CType(232, Byte), Integer), CType(CType(240, Byte), Integer))
             Me.btnBackToChooser.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-            Me.btnBackToChooser.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(90, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnBackToChooser.HoverColor = System.Drawing.Color.FromArgb(CType(CType(35, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.HoverColor = System.Drawing.Color.FromArgb(CType(CType(26, Byte), Integer), CType(CType(38, Byte), Integer), CType(CType(58, Byte), Integer))
             Me.btnBackToChooser.Location = New System.Drawing.Point(32, 388)
             Me.btnBackToChooser.Name = "btnBackToChooser"
-            Me.btnBackToChooser.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(18, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(24, Byte), Integer), CType(CType(38, Byte), Integer))
             Me.btnBackToChooser.Size = New System.Drawing.Size(402, 34)
             Me.btnBackToChooser.TabIndex = 9
             Me.btnBackToChooser.Text = "← Back to Portal Selection"
             '
             'btnRegister
             '
-            Me.btnRegister.BorderColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(56, Byte), Integer), CType(CType(189, Byte), Integer), CType(CType(248, Byte), Integer))
+            Me.btnRegister.BorderColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(56, Byte), Integer), CType(CType(189, Byte), Integer), CType(CType(248, Byte), Integer))
             Me.btnRegister.CornerRadius = 9
             Me.btnRegister.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.btnRegister.Font = New System.Drawing.Font("Segoe UI Semibold", 9.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-            Me.btnRegister.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(220, Byte), Integer), CType(CType(56, Byte), Integer), CType(CType(189, Byte), Integer), CType(CType(248, Byte), Integer))
-            Me.btnRegister.HoverColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(56, Byte), Integer), CType(CType(189, Byte), Integer), CType(CType(248, Byte), Integer))
+            Me.btnRegister.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(240, Byte), Integer), CType(CType(56, Byte), Integer), CType(CType(189, Byte), Integer), CType(CType(248, Byte), Integer))
+            Me.btnRegister.HoverColor = System.Drawing.Color.FromArgb(CType(CType(34, Byte), Integer), CType(CType(54, Byte), Integer), CType(CType(84, Byte), Integer))
             Me.btnRegister.Location = New System.Drawing.Point(32, 342)
             Me.btnRegister.Name = "btnRegister"
-            Me.btnRegister.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnRegister.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(34, Byte), Integer), CType(CType(52, Byte), Integer))
             Me.btnRegister.Size = New System.Drawing.Size(402, 38)
             Me.btnRegister.TabIndex = 8
             Me.btnRegister.Text = "🎓  New Student? Create Account with DeKUT Email"

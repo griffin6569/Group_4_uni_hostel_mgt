@@ -20,3 +20,4 @@ Place any of the following font files directly in this folder:
 - `SF-Mono-Regular.otf`
 
 They will be loaded into application memory automatically on boot without requiring system administrator font installation.
+

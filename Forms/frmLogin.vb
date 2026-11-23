@@ -26,6 +26,13 @@ Namespace Forms
             ThemeManager.EnableDoubleBuffering(picBrandLogo)
             ThemeManager.EnableDoubleBuffering(pnlDbStatusBadge)
 
+            ' Ensure form fits screen and centers
+            Dim workArea = Screen.FromControl(Me).WorkingArea
+            If Me.Height > workArea.Height - 40 Then
+                Me.Height = workArea.Height - 40
+            End If
+            Me.CenterToScreen()
+
             ' Load official Dedan Kimathi University of Technology logo
             picBrandLogo.Image = ThemeManager.GetInstitutionalLogo()
 

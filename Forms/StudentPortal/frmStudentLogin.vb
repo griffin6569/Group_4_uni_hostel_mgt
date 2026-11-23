@@ -27,6 +27,13 @@ Namespace Forms.StudentPortal
             ThemeManager.EnableDoubleBuffering(picBrandLogo)
             ThemeManager.EnableDoubleBuffering(pnlDbStatusBadge)
 
+            ' Ensure form fits screen and centers
+            Dim workArea = Screen.FromControl(Me).WorkingArea
+            If Me.Height > workArea.Height - 40 Then
+                Me.Height = workArea.Height - 40
+            End If
+            Me.CenterToScreen()
+
             picBrandLogo.Image = ThemeManager.GetInstitutionalLogo()
             lblDbStatusText.Text = $"Database: Connected [{DbConfig.Database}]"
             ThemeManager.ApplyTypography(Me)

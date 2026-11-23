@@ -1,7 +1,7 @@
 Imports System
+Imports System.Collections.Generic
 Imports System.Data
 Imports System.Drawing
-Imports System.IO
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports University_hostel_mgt.Controls
@@ -12,22 +12,22 @@ Imports University_hostel_mgt.Services
 
 Namespace Forms.StudentPortal
     ''' <summary>
-    ''' Ultra-modern student accommodation self-service dashboard for Dedan Kimathi University
-    ''' of Technology students. Features real-time bed space booking, roommate discovery,
-    ''' electronic fee payments & receipts, and room maintenance defect logging.
+    ''' Ultra-modern, responsive student self-service accommodation dashboard.
+    ''' Allows university students to view residency details, browse campus rooms,
+    ''' book available beds, settle fees with M-Pesa, and report maintenance issues.
     ''' </summary>
     Public Class frmStudentDashboard
         Private ReadOnly _currentUser As User
-        Private ReadOnly _portalService As New StudentPortalService()
         Private ReadOnly _studentRepo As New Data.Repositories.StudentRepository()
-        Private _currentAllocation As StudentAllocationDetail = Nothing
-        Private _studentProfile As Student = Nothing
+        Private ReadOnly _portalService As New StudentPortalService()
+
+        Private _studentProfile As Student
+        Private _currentAllocation As StudentAllocationDetail
         Private _isDragging As Boolean = False
         Private _dragStartPoint As Point
 
-        ' Tab Navigation Buttons
-        Private ReadOnly _navButtons As List(Of GlassButton)
-        Private ReadOnly _tabPanels As List(Of Panel)
+        Private _tabPanels As List(Of Panel)
+        Private _navButtons As List(Of GlassButton)
 
         Public Sub New(currentUser As User)
             InitializeComponent()
@@ -42,6 +42,14 @@ Namespace Forms.StudentPortal
             ThemeManager.EnableDoubleBuffering(pnlContent)
             ThemeManager.EnableDoubleBuffering(pnlHeader)
             ThemeManager.EnableDoubleBuffering(pnlNavBar)
+
+            ' Make form responsive to user screen resolution
+            Dim workArea = Screen.FromControl(Me).WorkingArea
+            Dim targetW As Integer = Math.Min(1200, Math.Max(960, CInt(workArea.Width * 0.9F)))
+            Dim targetH As Integer = Math.Min(780, Math.Max(580, CInt(workArea.Height * 0.88F)))
+            Me.Size = New Size(targetW, targetH)
+            Me.CenterToScreen()
+            Me.MinimumSize = New Size(920, 560)
 
             picLogo.Image = ThemeManager.GetInstitutionalLogo()
 
@@ -76,45 +84,118 @@ Namespace Forms.StudentPortal
             pnlTabMyRoom.Controls.Clear()
 
             If _currentAllocation Is Nothing Then
-                ' Not allocated state
-                Dim pnlEmpty As New GlassPanel() With {
+                ' Responsive Not Allocated Container
+                Dim pnlEmptyOuter As New Panel() With {
                     .Dock = DockStyle.Fill,
-                    .CornerRadius = 16,
-                    .FillColor = Color.FromArgb(200, 15, 23, 38),
-                    .BorderColor = Color.FromArgb(40, 255, 255, 255),
-                    .Padding = New Padding(40)
+                    .AutoScroll = True,
+                    .Padding = New Padding(4)
                 }
 
-                Dim lblEmptyTitle As New Label() With {
-                    .Text = "No Active Room Allocation for Current Semester",
-                    .Font = New Font("Segoe UI", 15.0F, FontStyle.Bold),
+                ' 1. Hero Card
+                Dim pnlHero As New GlassPanel() With {
+                    .Dock = DockStyle.Top,
+                    .Height = 195,
+                    .CornerRadius = 16,
+                    .FillColor = Color.FromArgb(210, 15, 23, 38),
+                    .BorderColor = Color.FromArgb(45, 255, 255, 255),
+                    .Padding = New Padding(28),
+                    .Margin = New Padding(0, 0, 0, 16)
+                }
+
+                Dim badgeUnallocated As New Label() With {
+                    .Text = "● ACCOMMODATION STATUS: UNALLOCATED — 2025/2026 ACADEMIC YEAR (SEMESTER 2)",
+                    .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                    .ForeColor = ThemeManager.AcademicGold,
+                    .BackColor = Color.FromArgb(30, 245, 158, 11),
+                    .Padding = New Padding(8, 4, 8, 4),
+                    .AutoSize = True,
+                    .Location = New Point(28, 20)
+                }
+
+                Dim lblHeroTitle As New Label() With {
+                    .Text = "Ready to Reserve Your Hostel Bed Space?",
+                    .Font = New Font("Segoe UI", 16.0F, FontStyle.Bold),
                     .ForeColor = Color.White,
                     .AutoSize = True,
-                    .Location = New Point(40, 40)
+                    .Location = New Point(28, 54)
                 }
 
-                Dim lblEmptyDesc As New Label() With {
-                    .Text = "You are currently not assigned to any bed space for the 2025/2026 Academic Year (Semester 2)." & vbCrLf &
-                            "Browse our student residential hostels and book an available bed unit instantly.",
-                    .Font = New Font("Segoe UI", 10.0F, FontStyle.Regular),
+                Dim lblHeroDesc As New Label() With {
+                    .Text = "You currently do not hold an active room reservation. Browse verified university residences," & vbCrLf &
+                            "select an eligible bed space with preferred amenities, and confirm your accommodation instantly.",
+                    .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular),
                     .ForeColor = Color.FromArgb(148, 163, 184),
-                    .Size = New Size(700, 50),
-                    .Location = New Point(40, 75)
+                    .Size = New Size(720, 38),
+                    .Location = New Point(28, 92)
                 }
 
                 Dim btnGoBrowse As New GlassButton() With {
-                    .Text = "🛏️ Browse Available Units & Book Bed Space",
-                    .Font = New Font("Segoe UI", 10.0F, FontStyle.Bold),
+                    .Text = "🛏 Explore Available Hostels & Choose Bed Unit ➔",
+                    .Font = New Font("Segoe UI", 9.5F, FontStyle.Bold),
                     .PrimaryColor = ThemeManager.EmeraldPrimary,
                     .CustomTextColor = Color.FromArgb(7, 10, 14),
-                    .CornerRadius = 12,
-                    .Size = New Size(360, 44),
-                    .Location = New Point(40, 140)
+                    .CornerRadius = 10,
+                    .Size = New Size(390, 42),
+                    .Location = New Point(28, 134)
                 }
                 AddHandler btnGoBrowse.Click, Sub() SwitchTab(1)
 
-                pnlEmpty.Controls.AddRange({lblEmptyTitle, lblEmptyDesc, btnGoBrowse})
-                pnlTabMyRoom.Controls.Add(pnlEmpty)
+                pnlHero.Controls.AddRange({badgeUnallocated, lblHeroTitle, lblHeroDesc, btnGoBrowse})
+
+                ' 2. Three-Step Guidance Matrix (Stretches across all screen sizes)
+                Dim pnlStepsGrid As New TableLayoutPanel() With {
+                    .Dock = DockStyle.Top,
+                    .Height = 165,
+                    .ColumnCount = 3,
+                    .RowCount = 1,
+                    .Margin = New Padding(0, 16, 0, 16)
+                }
+                pnlStepsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.33F))
+                pnlStepsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.33F))
+                pnlStepsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.34F))
+
+                pnlStepsGrid.Controls.Add(CreateStepCard("STEP 1", "🏢 Explore Residences", "View real-time room capacity, floor plans, and gender-segregated wings across campus."), 0, 0)
+                pnlStepsGrid.Controls.Add(CreateStepCard("STEP 2", "🛏 Select Bed Unit", "Inspect bed availability (Bed A, Bed B), study desks, lockable wardrobes, and window ventilation."), 1, 0)
+                pnlStepsGrid.Controls.Add(CreateStepCard("STEP 3", "💳 Instant Clearance", "Confirm reservation and settle fees via M-Pesa or Equity Bank with instant official receipt generation."), 2, 0)
+
+                ' 3. Directorate Support Banner
+                Dim pnlSupportBar As New GlassPanel() With {
+                    .Dock = DockStyle.Top,
+                    .Height = 72,
+                    .CornerRadius = 12,
+                    .FillColor = Color.FromArgb(160, 13, 20, 32),
+                    .BorderColor = Color.FromArgb(30, 255, 255, 255),
+                    .Padding = New Padding(20, 14, 20, 14),
+                    .Margin = New Padding(0, 16, 0, 0)
+                }
+
+                Dim lblSupportInfo As New Label() With {
+                    .Text = "ℹ Accommodation Directorate: Directorate Office Block, Ground Floor • Hours: Mon–Fri 8:00 AM – 5:00 PM • Ext. 2040 / 2041",
+                    .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular),
+                    .ForeColor = Color.FromArgb(203, 213, 225),
+                    .AutoSize = True,
+                    .Location = New Point(20, 26)
+                }
+
+                Dim btnContactDesk As New GlassButton() With {
+                    .Text = "🔧 Support Desk",
+                    .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                    .PrimaryColor = Color.FromArgb(25, 255, 255, 255),
+                    .CustomTextColor = Color.FromArgb(203, 213, 225),
+                    .CornerRadius = 8,
+                    .Size = New Size(140, 32),
+                    .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
+                    .Location = New Point(Math.Max(500, pnlSupportBar.ClientSize.Width - 160), 20)
+                }
+                AddHandler btnContactDesk.Click, Sub() SwitchTab(3)
+                AddHandler pnlSupportBar.Resize, Sub()
+                    btnContactDesk.Location = New Point(Math.Max(500, pnlSupportBar.ClientSize.Width - 160), 20)
+                End Sub
+
+                pnlSupportBar.Controls.AddRange({lblSupportInfo, btnContactDesk})
+
+                pnlEmptyOuter.Controls.AddRange({pnlSupportBar, pnlStepsGrid, pnlHero})
+                pnlTabMyRoom.Controls.Add(pnlEmptyOuter)
                 Return
             End If
 
@@ -227,7 +308,8 @@ Namespace Forms.StudentPortal
 
             Dim dgvRoommates As New DataGridView() With {
                 .Location = New Point(24, 46),
-                .Size = New Size(420, 160),
+                .Size = New Size(Math.Max(300, pnlRight.ClientSize.Width - 48), 155),
+                .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
                 .BackgroundColor = Color.FromArgb(14, 22, 35),
                 .BorderStyle = BorderStyle.None,
                 .ReadOnly = True,
@@ -250,13 +332,17 @@ Namespace Forms.StudentPortal
                 dgvRoommates.Rows.Add("—", "No other bedmates currently assigned.", "—")
             End If
 
+            AddHandler pnlRight.Resize, Sub()
+                dgvRoommates.Width = Math.Max(300, pnlRight.ClientSize.Width - 48)
+            End Sub
+
             ' Quick fee snapshot
             Dim lblFeeHeader As New Label() With {
                 .Text = "SEMESTER FEE SNAPSHOT",
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .ForeColor = ThemeManager.AcademicGold,
                 .AutoSize = True,
-                .Location = New Point(24, 224)
+                .Location = New Point(24, 220)
             }
 
             Dim lblFeeBalance As New Label() With {
@@ -264,26 +350,78 @@ Namespace Forms.StudentPortal
                 .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular),
                 .ForeColor = If(_currentAllocation.BalanceOwed > 0, ThemeManager.Coral, ThemeManager.EmeraldPrimary),
                 .AutoSize = True,
-                .Location = New Point(24, 248)
+                .Location = New Point(24, 244)
             }
 
             Dim btnPayNow As New GlassButton() With {
-                .Text = "💳 Make Payment (M-Pesa / Bank)",
+                .Text = "💳 Pay Fees (M-Pesa / Bank)",
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Bold),
                 .PrimaryColor = ThemeManager.EmeraldPrimary,
                 .CustomTextColor = Color.FromArgb(7, 10, 14),
                 .CornerRadius = 10,
-                .Size = New Size(240, 36),
-                .Location = New Point(24, 280)
+                .Size = New Size(220, 36),
+                .Location = New Point(24, 276)
             }
             AddHandler btnPayNow.Click, Sub() OpenStudentPaymentModal()
 
-            pnlRight.Controls.AddRange({lblRoommatesTitle, dgvRoommates, lblFeeHeader, lblFeeBalance, btnPayNow})
+            Dim btnViewBilling As New GlassButton() With {
+                .Text = "📄 View Ledger & Receipts",
+                .Font = New Font("Segoe UI", 9.0F, FontStyle.Bold),
+                .PrimaryColor = Color.FromArgb(25, 255, 255, 255),
+                .CustomTextColor = Color.FromArgb(203, 213, 225),
+                .CornerRadius = 10,
+                .Size = New Size(190, 36),
+                .Location = New Point(252, 276)
+            }
+            AddHandler btnViewBilling.Click, Sub() SwitchTab(2)
+
+            pnlRight.Controls.AddRange({lblRoommatesTitle, dgvRoommates, lblFeeHeader, lblFeeBalance, btnPayNow, btnViewBilling})
 
             pnlSplit.Controls.Add(pnlLeft, 0, 0)
             pnlSplit.Controls.Add(pnlRight, 1, 0)
             pnlTabMyRoom.Controls.Add(pnlSplit)
         End Sub
+
+        Private Function CreateStepCard(stepTag As String, stepTitle As String, stepDesc As String) As Control
+            Dim pnl As New GlassPanel() With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(6),
+                .CornerRadius = 14,
+                .FillColor = Color.FromArgb(190, 14, 22, 35),
+                .BorderColor = Color.FromArgb(35, 255, 255, 255),
+                .Padding = New Padding(18)
+            }
+
+            Dim lblTag As New Label() With {
+                .Text = stepTag,
+                .Font = New Font("Segoe UI Semibold", 8.0F, FontStyle.Bold),
+                .ForeColor = ThemeManager.AccentSapphire,
+                .AutoSize = True,
+                .Location = New Point(18, 16)
+            }
+
+            Dim lblTitle As New Label() With {
+                .Text = stepTitle,
+                .Font = New Font("Segoe UI", 11.0F, FontStyle.Bold),
+                .ForeColor = Color.White,
+                .AutoSize = True,
+                .Location = New Point(18, 38)
+            }
+
+            Dim lblDesc As New Label() With {
+                .Text = stepDesc,
+                .Font = New Font("Segoe UI", 8.5F, FontStyle.Regular),
+                .ForeColor = Color.FromArgb(148, 163, 184),
+                .Size = New Size(Math.Max(180, pnl.ClientSize.Width - 36), 65),
+                .Location = New Point(18, 64)
+            }
+            AddHandler pnl.Resize, Sub()
+                lblDesc.Width = Math.Max(180, pnl.ClientSize.Width - 36)
+            End Sub
+
+            pnl.Controls.AddRange({lblTag, lblTitle, lblDesc})
+            Return pnl
+        End Function
 
         ' =====================================================================
         ' TAB 2: BROWSE AVAILABLE UNITS
@@ -316,9 +454,12 @@ Namespace Forms.StudentPortal
                 .CornerRadius = 8,
                 .Size = New Size(130, 30),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .Location = New Point(pnlTabBrowse.Width - 150, 8)
+                .Location = New Point(Math.Max(300, pnlTabBrowse.Width - 150), 8)
             }
             AddHandler btnRefreshUnits.Click, Async Sub() Await BuildBrowseUnitsTabAsync()
+            AddHandler pnlFilter.Resize, Sub()
+                btnRefreshUnits.Location = New Point(Math.Max(300, pnlFilter.ClientSize.Width - 145), 8)
+            End Sub
 
             pnlFilter.Controls.AddRange({lblGenderPolicy, btnRefreshUnits})
             pnlTabBrowse.Controls.Add(pnlFilter)
@@ -432,23 +573,30 @@ Namespace Forms.StudentPortal
             Dim studentId = _currentUser.StudentId.GetValueOrDefault(0)
             Dim dtPayments = Await _portalService.GetStudentPaymentHistoryAsync(studentId)
 
-            ' Top Metrics Header
-            Dim pnlMetrics As New Panel() With {
+            ' Top Metrics Header (Responsive TableLayoutPanel)
+            Dim pnlMetricsGrid As New TableLayoutPanel() With {
                 .Dock = DockStyle.Top,
-                .Height = 110,
-                .Padding = New Padding(10)
+                .Height = 105,
+                .ColumnCount = 3,
+                .RowCount = 1,
+                .Padding = New Padding(0, 0, 0, 8)
             }
+            pnlMetricsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.33F))
+            pnlMetricsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.33F))
+            pnlMetricsGrid.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 33.34F))
 
             Dim fee = If(_currentAllocation IsNot Nothing, _currentAllocation.SemesterFee, 0.0D)
             Dim paid = If(_currentAllocation IsNot Nothing, _currentAllocation.TotalPaid, 0.0D)
             Dim bal = If(_currentAllocation IsNot Nothing, _currentAllocation.BalanceOwed, 0.0D)
 
-            Dim cardFee = CreateMetricCard("Semester Accommodation Fee", $"KES {fee:N2}", ThemeManager.AccentSapphire, New Point(10, 10))
-            Dim cardPaid = CreateMetricCard("Total Amount Settled", $"KES {paid:N2}", ThemeManager.EmeraldPrimary, New Point(320, 10))
-            Dim cardBal = CreateMetricCard("Outstanding Balance Owed", $"KES {bal:N2}", If(bal > 0, ThemeManager.Coral, ThemeManager.EmeraldPrimary), New Point(630, 10))
+            Dim cardFee = CreateMetricCard("Semester Accommodation Fee", $"KES {fee:N2}", ThemeManager.AccentSapphire)
+            Dim cardPaid = CreateMetricCard("Total Amount Settled", $"KES {paid:N2}", ThemeManager.EmeraldPrimary)
+            Dim cardBal = CreateMetricCard("Outstanding Balance Owed", $"KES {bal:N2}", If(bal > 0, ThemeManager.Coral, ThemeManager.EmeraldPrimary))
 
-            pnlMetrics.Controls.AddRange({cardFee, cardPaid, cardBal})
-            pnlTabBilling.Controls.Add(pnlMetrics)
+            pnlMetricsGrid.Controls.Add(cardFee, 0, 0)
+            pnlMetricsGrid.Controls.Add(cardPaid, 1, 0)
+            pnlMetricsGrid.Controls.Add(cardBal, 2, 0)
+            pnlTabBilling.Controls.Add(pnlMetricsGrid)
 
             ' Action Bar
             Dim pnlActions As New Panel() With {
@@ -463,7 +611,7 @@ Namespace Forms.StudentPortal
                 .PrimaryColor = ThemeManager.EmeraldPrimary,
                 .CustomTextColor = Color.FromArgb(7, 10, 14),
                 .CornerRadius = 8,
-                .Size = New Size(220, 34),
+                .Size = New Size(230, 34),
                 .Location = New Point(10, 6)
             }
             AddHandler btnMakePay.Click, Sub() OpenStudentPaymentModal()
@@ -505,10 +653,10 @@ Namespace Forms.StudentPortal
             dgvPayments.BringToFront()
         End Function
 
-        Private Function CreateMetricCard(title As String, value As String, valueColor As Color, loc As Point) As Control
+        Private Function CreateMetricCard(title As String, value As String, valueColor As Color) As Control
             Dim pnl As New GlassPanel() With {
-                .Size = New Size(290, 80),
-                .Location = loc,
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(6),
                 .CornerRadius = 12,
                 .FillColor = Color.FromArgb(200, 15, 23, 38),
                 .BorderColor = Color.FromArgb(40, 255, 255, 255),
@@ -565,11 +713,14 @@ Namespace Forms.StudentPortal
                 .PrimaryColor = ThemeManager.EmeraldPrimary,
                 .CustomTextColor = Color.FromArgb(7, 10, 14),
                 .CornerRadius = 8,
-                .Size = New Size(200, 32),
+                .Size = New Size(210, 32),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .Location = New Point(pnlTabMaintenance.Width - 220, 9)
+                .Location = New Point(Math.Max(300, pnlActions.ClientSize.Width - 220), 9)
             }
             AddHandler btnNewTicket.Click, Sub() OpenStudentIssueModal()
+            AddHandler pnlActions.Resize, Sub()
+                btnNewTicket.Location = New Point(Math.Max(300, pnlActions.ClientSize.Width - 220), 9)
+            End Sub
 
             pnlActions.Controls.AddRange({lblTitle, btnNewTicket})
             pnlTabMaintenance.Controls.Add(pnlActions)
@@ -600,8 +751,6 @@ Namespace Forms.StudentPortal
             End If
             If dgvMaint.Columns.Contains("resolution_notes") Then dgvMaint.Columns("resolution_notes").HeaderText = "Resolution Notes"
             If dgvMaint.Columns.Contains("issue_description") Then dgvMaint.Columns("issue_description").Visible = False
-            If dgvMaint.Columns.Contains("evidence_image_path") Then dgvMaint.Columns("evidence_image_path").Visible = False
-            If dgvMaint.Columns.Contains("resolved_date") Then dgvMaint.Columns("resolved_date").Visible = False
 
             pnlTabMaintenance.Controls.Add(dgvMaint)
             dgvMaint.BringToFront()
@@ -610,17 +759,17 @@ Namespace Forms.StudentPortal
         ' =====================================================================
         ' MODAL LAUNCHERS
         ' =====================================================================
-        Private Sub OpenBookBedModal(roomCard As AvailableRoomCard)
+        Private Async Sub OpenBookBedModal(roomCard As AvailableRoomCard)
             Using modal As New frmBookBedModal(roomCard, _currentUser)
                 If modal.ShowDialog(Me) = DialogResult.OK Then
                     MessageBox.Show("Bed space booked successfully! Your residency status has been updated.", "Booking Confirmed", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                    RefreshAllStudentDataAsync().ConfigureAwait(False)
+                    Await RefreshAllStudentDataAsync()
                     SwitchTab(0)
                 End If
             End Using
         End Sub
 
-        Private Sub OpenStudentPaymentModal()
+        Private Async Sub OpenStudentPaymentModal()
             If _currentAllocation Is Nothing Then
                 MessageBox.Show("You currently do not have an active bed allocation to make payments for.", "No Active Allocation", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
@@ -632,7 +781,6 @@ Namespace Forms.StudentPortal
                     Dim askReceipt = MessageBox.Show($"Payment verified! Receipt #{receiptNo} generated." & vbCrLf & "Would you like to preview/print your official DeKUT receipt now?",
                                                      "Payment Confirmed", MessageBoxButtons.YesNo, MessageBoxIcon.Information)
                     If askReceipt = DialogResult.Yes Then
-                        ' Fetch payment ID to show preview
                         Dim dt = DatabaseConnection.ExecuteDataTable("SELECT TOP 1 payment_id FROM dbo.payments WHERE receipt_number = @rec;", {DatabaseConnection.CreateParam("@rec", receiptNo, SqlDbType.NVarChar)})
                         If dt.Rows.Count > 0 Then
                             Using receiptModal As New Forms.Billing.frmReceiptPreviewModal(Convert.ToInt32(dt.Rows(0)("payment_id")))
@@ -641,12 +789,12 @@ Namespace Forms.StudentPortal
                         End If
                     End If
 
-                    RefreshAllStudentDataAsync().ConfigureAwait(False)
+                    Await RefreshAllStudentDataAsync()
                 End If
             End Using
         End Sub
 
-        Private Sub OpenStudentIssueModal()
+        Private Async Sub OpenStudentIssueModal()
             If _currentAllocation Is Nothing Then
                 MessageBox.Show("Please book a bed space first before reporting room defects.", "No Active Unit", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
@@ -655,7 +803,7 @@ Namespace Forms.StudentPortal
             Using modal As New frmStudentIssueModal(_currentAllocation.RoomId, _currentAllocation.BedId, _currentUser)
                 If modal.ShowDialog(Me) = DialogResult.OK Then
                     MessageBox.Show("Maintenance ticket submitted successfully. University technicians will inspect the defect.", "Ticket Lodged", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                    BuildMaintenanceTabAsync().ConfigureAwait(False)
+                    Await BuildMaintenanceTabAsync()
                     SwitchTab(3)
                 End If
             End Using
@@ -672,13 +820,67 @@ Namespace Forms.StudentPortal
                 If isSelected Then
                     _navButtons(i).PrimaryColor = ThemeManager.EmeraldPrimary
                     _navButtons(i).CustomTextColor = Color.FromArgb(7, 10, 14)
+                    _navButtons(i).BorderColor = Color.FromArgb(52, 211, 153)
+                    _navButtons(i).HoverBorderColor = Color.FromArgb(110, 231, 183)
                     _navButtons(i).Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
                 Else
-                    _navButtons(i).PrimaryColor = Color.FromArgb(15, 255, 255, 255)
-                    _navButtons(i).CustomTextColor = Color.FromArgb(148, 163, 184)
+                    _navButtons(i).PrimaryColor = Color.FromArgb(18, 26, 40)
+                    _navButtons(i).HoverColor = Color.FromArgb(28, 42, 64)
+                    _navButtons(i).BorderColor = Color.FromArgb(50, 255, 255, 255)
+                    _navButtons(i).HoverBorderColor = Color.FromArgb(120, 255, 255, 255)
+                    _navButtons(i).CustomTextColor = Color.FromArgb(203, 213, 225)
                     _navButtons(i).Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold)
                 End If
             Next
+        End Sub
+
+        Private Sub pnlNavBar_Resize(sender As Object, e As EventArgs) Handles pnlNavBar.Resize
+            If btnNavMyRoom Is Nothing OrElse btnNavBrowse Is Nothing OrElse btnNavBilling Is Nothing OrElse btnNavMaintenance Is Nothing Then Return
+            Dim padLeft As Integer = 14
+            Dim totalW As Integer = pnlNavBar.ClientSize.Width - (padLeft * 2)
+            Dim gap As Integer = 10
+            Dim count As Integer = 4
+            Dim btnWidth As Integer = Math.Max(140, (totalW - (gap * (count - 1))) \ count)
+
+            btnNavMyRoom.Size = New Size(btnWidth, 36)
+            btnNavMyRoom.Location = New Point(padLeft, 6)
+
+            btnNavBrowse.Size = New Size(btnWidth, 36)
+            btnNavBrowse.Location = New Point(padLeft + btnWidth + gap, 6)
+
+            btnNavBilling.Size = New Size(btnWidth, 36)
+            btnNavBilling.Location = New Point(padLeft + (btnWidth + gap) * 2, 6)
+
+            btnNavMaintenance.Size = New Size(btnWidth, 36)
+            btnNavMaintenance.Location = New Point(padLeft + (btnWidth + gap) * 3, 6)
+        End Sub
+
+        Private Sub pnlHeader_Resize(sender As Object, e As EventArgs) Handles pnlHeader.Resize
+            If btnClose Is Nothing OrElse btnMaximize Is Nothing OrElse btnMinimize Is Nothing Then Return
+            Dim rightMargin As Integer = pnlHeader.ClientSize.Width - 10
+            btnClose.Location = New Point(rightMargin - 35, 12)
+            btnMaximize.Location = New Point(rightMargin - 72, 12)
+            btnMinimize.Location = New Point(rightMargin - 109, 12)
+            btnSignOut.Location = New Point(rightMargin - 200, 12)
+
+            Dim pillRight As Integer = rightMargin - 212
+            If pillRight > 650 Then
+                lblStudentPill.Visible = True
+                lblStudentPill.Location = New Point(pillRight - lblStudentPill.Width, 12)
+                Dim semRight As Integer = lblStudentPill.Left - 10
+                If semRight > 450 Then
+                    lblSemesterPill.Visible = True
+                    lblSemesterPill.Location = New Point(semRight - lblSemesterPill.Width, 12)
+                Else
+                    lblSemesterPill.Visible = False
+                End If
+            Else
+                lblSemesterPill.Visible = False
+                lblStudentPill.Visible = (pillRight > 400)
+                If lblStudentPill.Visible Then
+                    lblStudentPill.Location = New Point(pillRight - lblStudentPill.Width, 12)
+                End If
+            End If
         End Sub
 
         Private Sub btnNavMyRoom_Click(sender As Object, e As EventArgs) Handles btnNavMyRoom.Click
@@ -707,6 +909,78 @@ Namespace Forms.StudentPortal
 
         Private Sub btnMinimize_Click(sender As Object, e As EventArgs) Handles btnMinimize.Click
             Me.WindowState = FormWindowState.Minimized
+        End Sub
+
+        Private Sub btnMaximize_Click(sender As Object, e As EventArgs) Handles btnMaximize.Click
+            If Me.WindowState = FormWindowState.Maximized Then
+                Me.WindowState = FormWindowState.Normal
+                btnMaximize.Text = "🗖"
+            Else
+                Me.WindowState = FormWindowState.Maximized
+                btnMaximize.Text = "🗗"
+            End If
+        End Sub
+
+        Private Sub pnlHeader_DoubleClick(sender As Object, e As EventArgs) Handles pnlHeader.DoubleClick, lblBrandTitle.DoubleClick
+            btnMaximize_Click(sender, e)
+        End Sub
+
+        ' =====================================================================
+        ' WINDOW DRAGGING & EDGE RESIZE (BORDERLESS NATIVE RESIZE)
+        ' =====================================================================
+        Protected Overrides Sub WndProc(ByRef m As Message)
+            Const WM_NCHITTEST As Integer = &H84
+            Const HTCLIENT As Integer = 1
+            Const HTLEFT As Integer = 10
+            Const HTRIGHT As Integer = 11
+            Const HTTOP As Integer = 12
+            Const HTTOPLEFT As Integer = 13
+            Const HTTOPRIGHT As Integer = 14
+            Const HTBOTTOM As Integer = 15
+            Const HTBOTTOMLEFT As Integer = 16
+            Const HTBOTTOMRIGHT As Integer = 17
+
+            If m.Msg = WM_NCHITTEST AndAlso Me.WindowState = FormWindowState.Normal Then
+                MyBase.WndProc(m)
+                If m.Result.ToInt32() = HTCLIENT Then
+                    Dim screenPoint As New Point(m.LParam.ToInt32() And &HFFFF, (m.LParam.ToInt32() >> 16) And &HFFFF)
+                    Dim pt As Point = Me.PointToClient(screenPoint)
+                    Dim resizeArea As Integer = 8
+                    Dim isLeft As Boolean = (pt.X <= resizeArea)
+                    Dim isRight As Boolean = (pt.X >= Me.ClientSize.Width - resizeArea)
+                    Dim isTop As Boolean = (pt.Y <= resizeArea)
+                    Dim isBottom As Boolean = (pt.Y >= Me.ClientSize.Height - resizeArea)
+
+                    If isTop AndAlso isLeft Then
+                        m.Result = New IntPtr(HTTOPLEFT)
+                        Return
+                    ElseIf isTop AndAlso isRight Then
+                        m.Result = New IntPtr(HTTOPRIGHT)
+                        Return
+                    ElseIf isBottom AndAlso isLeft Then
+                        m.Result = New IntPtr(HTBOTTOMLEFT)
+                        Return
+                    ElseIf isBottom AndAlso isRight Then
+                        m.Result = New IntPtr(HTBOTTOMRIGHT)
+                        Return
+                    ElseIf isLeft Then
+                        m.Result = New IntPtr(HTLEFT)
+                        Return
+                    ElseIf isRight Then
+                        m.Result = New IntPtr(HTRIGHT)
+                        Return
+                    ElseIf isTop Then
+                        m.Result = New IntPtr(HTTOP)
+                        Return
+                    ElseIf isBottom Then
+                        m.Result = New IntPtr(HTBOTTOM)
+                        Return
+                    End If
+                End If
+                Return
+            End If
+
+            MyBase.WndProc(m)
         End Sub
 
         Private Sub pnlHeader_MouseDown(sender As Object, e As MouseEventArgs) Handles pnlHeader.MouseDown, lblBrandTitle.MouseDown, lblSubBrand.MouseDown

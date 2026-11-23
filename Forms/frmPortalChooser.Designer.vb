@@ -327,7 +327,7 @@ Namespace Forms
             Me.pnlDbBadge.FillColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(24, Byte), Integer), CType(CType(38, Byte), Integer))
             Me.pnlDbBadge.Location = New System.Drawing.Point(50, 508)
             Me.pnlDbBadge.Name = "pnlDbBadge"
-            Me.pnlDbBadge.Size = New System.Drawing.Size(260, 28)
+            Me.pnlDbBadge.Size = New System.Drawing.Size(320, 28)
             Me.pnlDbBadge.TabIndex = 8
             '
             'lblDbDot

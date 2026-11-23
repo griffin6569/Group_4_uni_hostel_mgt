@@ -32,10 +32,10 @@ Namespace Controls
             SetStyle(ControlStyles.UserPaint Or
                      ControlStyles.AllPaintingInWmPaint Or
                      ControlStyles.OptimizedDoubleBuffer Or
-                     ControlStyles.ResizeRedraw Or
-                     ControlStyles.SupportsTransparentBackColor, True)
+                     ControlStyles.ResizeRedraw, True)
+            SetStyle(ControlStyles.SupportsTransparentBackColor, False)
             Me.DoubleBuffered = True
-            Me.BackColor = Color.Transparent
+            Me.BackColor = Color.FromArgb(17, 24, 38)
             Me.FlatStyle = FlatStyle.Flat
             Me.FlatAppearance.BorderSize = 0
             Me.Cursor = Cursors.Hand
@@ -53,6 +53,20 @@ Namespace Controls
             End Get
             Set(value As Integer)
                 _cornerRadius = Math.Max(0, value)
+                Me.Invalidate()
+            End Set
+        End Property
+
+        Public Overrides Property BackColor As Color
+            Get
+                Return MyBase.BackColor
+            End Get
+            Set(value As Color)
+                If value = Color.Transparent Then
+                    MyBase.BackColor = Color.FromArgb(17, 24, 38)
+                Else
+                    MyBase.BackColor = value
+                End If
                 Me.Invalidate()
             End Set
         End Property
@@ -192,11 +206,30 @@ Namespace Controls
             End If
         End Sub
 
+        Protected Overrides Sub OnPaintBackground(pevent As PaintEventArgs)
+            ' Intentionally suppressed: GDI+ transparency on nested containers erroneously
+            ' blits mismatched sibling control pixels into the backbuffer. Surface clearing is handled in OnPaint.
+        End Sub
+
         Protected Overrides Sub OnPaint(pevent As PaintEventArgs)
             Dim g As Graphics = pevent.Graphics
             g.SmoothingMode = SmoothingMode.AntiAlias
             g.PixelOffsetMode = PixelOffsetMode.HighQuality
             g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit
+
+            ' Clear background with true parent card tone to eliminate any WinForms artifact blitting
+            Dim parentBg As Color = Color.FromArgb(17, 24, 38)
+            If Me.Parent IsNot Nothing Then
+                If TypeOf Me.Parent Is GlassPanel Then
+                    parentBg = DirectCast(Me.Parent, GlassPanel).FillColor
+                ElseIf Me.Parent.BackColor <> Color.Transparent Then
+                    parentBg = Me.Parent.BackColor
+                End If
+            End If
+            Dim opaqueBase As Color = Color.FromArgb(255, parentBg.R, parentBg.G, parentBg.B)
+            Using baseBrush As New SolidBrush(opaqueBase)
+                g.FillRectangle(baseBrush, Me.ClientRectangle)
+            End Using
 
             Dim rect As New RectangleF(1.0F, 1.0F, Me.Width - 3.0F, Me.Height - 3.0F)
             If rect.Width <= 0 OrElse rect.Height <= 0 Then Return
@@ -211,7 +244,7 @@ Namespace Controls
                         g.DrawPath(disPen, path)
                     End Using
                     TextRenderer.DrawText(g, Me.Text, Me.Font, Me.ClientRectangle, Color.FromArgb(148, 163, 184),
-                                          TextFormatFlags.HorizontalCenter Or TextFormatFlags.VerticalCenter)
+                                          TextFormatFlags.HorizontalCenter Or TextFormatFlags.VerticalCenter Or TextFormatFlags.NoPrefix)
                     Return
                 End If
 
@@ -251,7 +284,7 @@ Namespace Controls
                 End Using
 
                 ' 5. Draw Centered Text
-                Dim flags As TextFormatFlags = TextFormatFlags.HorizontalCenter Or TextFormatFlags.VerticalCenter Or TextFormatFlags.SingleLine
+                Dim flags As TextFormatFlags = TextFormatFlags.HorizontalCenter Or TextFormatFlags.VerticalCenter Or TextFormatFlags.SingleLine Or TextFormatFlags.NoPrefix
                 Dim textRect As Rectangle = Me.ClientRectangle
                 If _isPressed Then
                     textRect.Offset(0, 1)

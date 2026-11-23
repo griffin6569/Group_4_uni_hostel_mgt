@@ -265,10 +265,10 @@ Namespace Forms
             Me.btnBackToChooser.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(226, Byte), Integer), CType(CType(232, Byte), Integer), CType(CType(240, Byte), Integer))
             Me.btnBackToChooser.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnBackToChooser.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnBackToChooser.HoverColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.HoverColor = System.Drawing.Color.FromArgb(CType(CType(32, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(66, Byte), Integer))
             Me.btnBackToChooser.Location = New System.Drawing.Point(36, 408)
             Me.btnBackToChooser.Name = "btnBackToChooser"
-            Me.btnBackToChooser.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnBackToChooser.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(20, Byte), Integer), CType(CType(28, Byte), Integer), CType(CType(42, Byte), Integer))
             Me.btnBackToChooser.Size = New System.Drawing.Size(438, 38)
             Me.btnBackToChooser.TabIndex = 9
             Me.btnBackToChooser.Text = "← Back to Portal Selection"
@@ -282,10 +282,10 @@ Namespace Forms
             Me.btnExitApp.DialogResult = System.Windows.Forms.DialogResult.Cancel
             Me.btnExitApp.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnExitApp.HoverBorderColor = System.Drawing.Color.FromArgb(CType(CType(80, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
-            Me.btnExitApp.HoverColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnExitApp.HoverColor = System.Drawing.Color.FromArgb(CType(CType(26, Byte), Integer), CType(CType(36, Byte), Integer), CType(CType(52, Byte), Integer))
             Me.btnExitApp.Location = New System.Drawing.Point(36, 452)
             Me.btnExitApp.Name = "btnExitApp"
-            Me.btnExitApp.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
+            Me.btnExitApp.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(16, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(34, Byte), Integer))
             Me.btnExitApp.Size = New System.Drawing.Size(438, 32)
             Me.btnExitApp.TabIndex = 10
             Me.btnExitApp.Text = "Exit Application"

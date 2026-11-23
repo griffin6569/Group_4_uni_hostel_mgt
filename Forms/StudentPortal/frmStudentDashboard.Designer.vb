@@ -21,6 +21,7 @@ Namespace Forms.StudentPortal
             Me.pnlTopAccent = New System.Windows.Forms.Panel()
             Me.pnlHeader = New System.Windows.Forms.Panel()
             Me.btnMinimize = New System.Windows.Forms.Button()
+            Me.btnMaximize = New System.Windows.Forms.Button()
             Me.btnClose = New System.Windows.Forms.Button()
             Me.btnSignOut = New University_hostel_mgt.Controls.GlassButton()
             Me.lblStudentPill = New System.Windows.Forms.Label()
@@ -57,6 +58,7 @@ Namespace Forms.StudentPortal
             '
             Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(7, Byte), Integer), CType(CType(10, Byte), Integer), CType(CType(14, Byte), Integer))
             Me.pnlHeader.Controls.Add(Me.btnMinimize)
+            Me.pnlHeader.Controls.Add(Me.btnMaximize)
             Me.pnlHeader.Controls.Add(Me.btnClose)
             Me.pnlHeader.Controls.Add(Me.btnSignOut)
             Me.pnlHeader.Controls.Add(Me.lblStudentPill)
@@ -78,12 +80,27 @@ Namespace Forms.StudentPortal
             Me.btnMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnMinimize.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.btnMinimize.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
-            Me.btnMinimize.Location = New System.Drawing.Point(1040, 12)
+            Me.btnMinimize.Location = New System.Drawing.Point(1005, 12)
             Me.btnMinimize.Name = "btnMinimize"
             Me.btnMinimize.Size = New System.Drawing.Size(35, 30)
-            Me.btnMinimize.TabIndex = 7
+            Me.btnMinimize.TabIndex = 8
             Me.btnMinimize.Text = "—"
             Me.btnMinimize.UseVisualStyleBackColor = True
+            '
+            'btnMaximize
+            '
+            Me.btnMaximize.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.btnMaximize.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnMaximize.FlatAppearance.BorderSize = 0
+            Me.btnMaximize.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+            Me.btnMaximize.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
+            Me.btnMaximize.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
+            Me.btnMaximize.Location = New System.Drawing.Point(1042, 12)
+            Me.btnMaximize.Name = "btnMaximize"
+            Me.btnMaximize.Size = New System.Drawing.Size(35, 30)
+            Me.btnMaximize.TabIndex = 7
+            Me.btnMaximize.Text = "🗖"
+            Me.btnMaximize.UseVisualStyleBackColor = True
             '
             'btnClose
             '
@@ -93,7 +110,7 @@ Namespace Forms.StudentPortal
             Me.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnClose.Font = New System.Drawing.Font("Segoe UI", 11.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.btnClose.ForeColor = System.Drawing.Color.FromArgb(CType(CType(148, Byte), Integer), CType(CType(163, Byte), Integer), CType(CType(184, Byte), Integer))
-            Me.btnClose.Location = New System.Drawing.Point(1080, 12)
+            Me.btnClose.Location = New System.Drawing.Point(1079, 12)
             Me.btnClose.Name = "btnClose"
             Me.btnClose.Size = New System.Drawing.Size(35, 30)
             Me.btnClose.TabIndex = 6
@@ -107,7 +124,7 @@ Namespace Forms.StudentPortal
             Me.btnSignOut.CustomTextColor = System.Drawing.Color.FromArgb(CType(CType(203, Byte), Integer), CType(CType(213, Byte), Integer), CType(CType(225, Byte), Integer))
             Me.btnSignOut.Font = New System.Drawing.Font("Segoe UI Semibold", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.btnSignOut.HoverColor = System.Drawing.Color.FromArgb(CType(CType(45, Byte), Integer), CType(CType(239, Byte), Integer), CType(CType(68, Byte), Integer), CType(CType(68, Byte), Integer))
-            Me.btnSignOut.Location = New System.Drawing.Point(945, 12)
+            Me.btnSignOut.Location = New System.Drawing.Point(915, 12)
             Me.btnSignOut.Name = "btnSignOut"
             Me.btnSignOut.PrimaryColor = System.Drawing.Color.FromArgb(CType(CType(25, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer))
             Me.btnSignOut.Size = New System.Drawing.Size(80, 32)
@@ -321,6 +338,7 @@ Namespace Forms.StudentPortal
         Friend WithEvents lblStudentPill As System.Windows.Forms.Label
         Friend WithEvents btnSignOut As University_hostel_mgt.Controls.GlassButton
         Friend WithEvents btnClose As System.Windows.Forms.Button
+        Friend WithEvents btnMaximize As System.Windows.Forms.Button
         Friend WithEvents btnMinimize As System.Windows.Forms.Button
         Friend WithEvents pnlNavBar As System.Windows.Forms.Panel
         Friend WithEvents btnNavMyRoom As University_hostel_mgt.Controls.GlassButton
