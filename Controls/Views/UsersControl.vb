@@ -2,6 +2,7 @@ Imports System.Data
 Imports System.Drawing
 Imports System.Linq
 Imports System.Windows.Forms
+Imports University_hostel_mgt.Controls
 Imports University_hostel_mgt.Data.Repositories
 Imports University_hostel_mgt.Forms.Users
 Imports University_hostel_mgt.Helpers
@@ -11,7 +12,7 @@ Namespace Controls.Views
     ''' <summary>
     ''' System User Administration & RBAC Security Control.
     ''' Manages staff accounts, security role assignment, password resets,
-    ''' and visualizes immutable activity audit logs.
+    ''' and visualizes immutable activity audit logs in Frosted Glassmorphism.
     ''' </summary>
     Public Class UsersControl
         Inherits UserControl
@@ -19,24 +20,30 @@ Namespace Controls.Views
         Private ReadOnly _currentUserId As Integer
         Private ReadOnly _userRepo As New UserRepository()
 
-        Private pnlKpi As Panel
+        ' Metrics Strip (Responsive 4-Widget TableLayoutPanel)
+        Private pnlMetricsRow As TableLayoutPanel
+        Private kpiTotalUsers As GlassKpiWidget
+        Private kpiActiveUsers As GlassKpiWidget
+        Private kpiAdmins As GlassKpiWidget
+        Private kpiOfficers As GlassKpiWidget
+
         Private tabMain As TabControl
         Private tabUsers As TabPage
         Private tabAudit As TabPage
 
         ' Users Tab Controls
-        Private pnlUserActions As Panel
-        Private txtSearchUser As TextBox
+        Private pnlUserActions As PrestigeGlassCard
+        Private searchBoxUser As GlassSearchBox
         Private cboRoleFilter As ComboBox
-        Private btnAddUser As Button
-        Private btnEditUser As Button
-        Private btnRefreshUsers As Button
+        Private btnAddUser As GlassButton
+        Private btnEditUser As GlassButton
+        Private btnRefreshUsers As GlassButton
         Private dgvUsers As DataGridView
 
         ' Audit Tab Controls
-        Private pnlAuditActions As Panel
-        Private txtSearchAudit As TextBox
-        Private btnRefreshAudit As Button
+        Private pnlAuditActions As PrestigeGlassCard
+        Private searchBoxAudit As GlassSearchBox
+        Private btnRefreshAudit As GlassButton
         Private dgvAudit As DataGridView
 
         Private _users As List(Of User) = New List(Of User)()
@@ -46,38 +53,104 @@ Namespace Controls.Views
             _currentUserId = currentUserId
             InitializeUI()
             Dock = DockStyle.Fill
-            BackColor = Color.FromArgb(248, 250, 252)
+            BackColor = ThemeManager.CanvasDark
+            ThemeManager.EnableDoubleBuffering(Me)
         End Sub
 
         Private Sub InitializeUI()
             Me.SuspendLayout()
 
-            ' 1. KPI Panel
-            pnlKpi = New Panel With {
+            ' =========================================================================
+            ' 1. KPI SUMMARY ROW (4 Frosted Glass Widgets)
+            ' =========================================================================
+            pnlMetricsRow = New TableLayoutPanel With {
                 .Dock = DockStyle.Top,
-                .Height = 84,
-                .BackColor = Color.FromArgb(248, 250, 252),
-                .Padding = New Padding(16, 8, 16, 8)
+                .Height = 100,
+                .ColumnCount = 4,
+                .RowCount = 1,
+                .BackColor = Color.Transparent,
+                .Padding = New Padding(16, 12, 16, 8)
+            }
+            pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+
+            kpiTotalUsers = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(0, 0, 6, 0),
+                .CategoryTitle = "TOTAL STAFF MEMBERS",
+                .PrimaryValue = "0",
+                .Subtitle = "Registered university personnel",
+                .AccentColor = ThemeManager.GlassStatusInfo,
+                .IconSymbol = "👥"
             }
 
-            ' 2. Main Tab Control
+            kpiActiveUsers = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "ACTIVE CREDENTIALS",
+                .PrimaryValue = "0",
+                .Subtitle = "Operational system logins",
+                .AccentColor = ThemeManager.GlassStatusSuccess,
+                .ValueColor = ThemeManager.GlassStatusSuccess,
+                .IconSymbol = "🛡️"
+            }
+
+            kpiAdmins = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "ADMINISTRATORS",
+                .PrimaryValue = "0",
+                .Subtitle = "Privileged security access",
+                .AccentColor = ThemeManager.GlassStatusWarning,
+                .ValueColor = ThemeManager.GlassStatusWarning,
+                .IconSymbol = "🔑"
+            }
+
+            kpiOfficers = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(6, 0, 0, 0),
+                .CategoryTitle = "DEPARTMENT OFFICERS",
+                .PrimaryValue = "0",
+                .Subtitle = "Hostel & Bursary desk staff",
+                .AccentColor = ThemeManager.AccentSapphire,
+                .ValueColor = ThemeManager.GlassStatusInfo,
+                .IconSymbol = "💼"
+            }
+
+            pnlMetricsRow.Controls.Add(kpiTotalUsers, 0, 0)
+            pnlMetricsRow.Controls.Add(kpiActiveUsers, 1, 0)
+            pnlMetricsRow.Controls.Add(kpiAdmins, 2, 0)
+            pnlMetricsRow.Controls.Add(kpiOfficers, 3, 0)
+
+            ' =========================================================================
+            ' 2. MAIN TAB CONTROL
+            ' =========================================================================
             tabMain = New TabControl With {
                 .Dock = DockStyle.Fill,
-                .Font = New Font("Segoe UI Semibold", 9.0F)
+                .Font = New Font("Segoe UI Semibold", 9.5F, FontStyle.Bold),
+                .Padding = New Point(12, 6)
             }
 
             ' TAB 1: USERS
-            tabUsers = New TabPage("👥 Staff Directory & RBAC Roles") With {.BackColor = Color.White}
+            tabUsers = New TabPage("  👥 Staff Directory & RBAC Roles  ") With {
+                .BackColor = ThemeManager.CanvasDark,
+                .Padding = New Padding(12)
+            }
             InitializeUsersTab()
 
             ' TAB 2: AUDIT LOGS
-            tabAudit = New TabPage("📜 System Activity Audit Trail") With {.BackColor = Color.White}
+            tabAudit = New TabPage("  📜 System Activity Audit Trail  ") With {
+                .BackColor = ThemeManager.CanvasDark,
+                .Padding = New Padding(12)
+            }
             InitializeAuditTab()
 
             tabMain.TabPages.AddRange({tabUsers, tabAudit})
 
             Controls.Add(tabMain)
-            Controls.Add(pnlKpi)
+            Controls.Add(pnlMetricsRow)
 
             Me.ResumeLayout(False)
 
@@ -91,61 +164,67 @@ Namespace Controls.Views
         End Sub
 
         Private Sub InitializeUsersTab()
-            pnlUserActions = New Panel With {
+            pnlUserActions = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 50,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 10, 16, 10)
+                .Height = 58,
+                .Margin = New Padding(0, 0, 0, 8),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
             }
 
-            txtSearchUser = New TextBox With {
-                .Location = New Point(16, 13),
-                .Width = 220,
-                .PlaceholderText = "🔍 Search name, username, email..."
+            searchBoxUser = New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Width = 240,
+                .PlaceholderText = "Search staff, username, email..."
             }
 
-            Dim lblR As New Label With {.Text = "Role:", .AutoSize = True, .Location = New Point(250, 16), .Font = New Font("Segoe UI Semibold", 8.5F)}
-            cboRoleFilter = New ComboBox With {.Location = New Point(290, 13), .Width = 170, .DropDownStyle = ComboBoxStyle.DropDownList}
+            Dim lblR As New Label With {
+                .Text = "Filter Role:",
+                .AutoSize = True,
+                .Location = New Point(270, 18),
+                .Font = ThemeManager.FontSmallBold,
+                .ForeColor = ThemeManager.TextSilverSlate
+            }
+
+            cboRoleFilter = New ComboBox With {
+                .Location = New Point(345, 14),
+                .Width = 160,
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = ThemeManager.GlassInputFill,
+                .ForeColor = ThemeManager.TextChalkWhite,
+                .FlatStyle = FlatStyle.Flat,
+                .Font = New Font("Segoe UI", 9.0F)
+            }
             cboRoleFilter.Items.Add("ALL ROLES")
             cboRoleFilter.SelectedIndex = 0
 
-            btnAddUser = New Button With {
+            btnAddUser = New GlassButton With {
                 .Text = "➕ Add Staff User",
-                .BackColor = ThemeManager.NavyPrimary,
-                .ForeColor = Color.White,
-                .FlatStyle = FlatStyle.Flat,
-                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .Size = New Size(140, 28),
-                .Location = New Point(480, 11)
+                .Size = New Size(150, 32),
+                .Location = New Point(520, 11)
             }
-            btnAddUser.FlatAppearance.BorderSize = 0
+            btnAddUser.SetPrimaryStyle()
 
-            btnEditUser = New Button With {
+            btnEditUser = New GlassButton With {
                 .Text = "✏️ Edit Account",
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.NavyPrimary,
-                .FlatStyle = FlatStyle.Flat,
-                .Font = New Font("Segoe UI", 8.5F),
-                .Size = New Size(120, 28),
-                .Location = New Point(630, 11),
+                .Size = New Size(130, 32),
+                .Location = New Point(680, 11),
                 .Enabled = False
             }
-            btnEditUser.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnEditUser.SetSecondaryStyle()
 
-            btnRefreshUsers = New Button With {
-                .Text = "🔄",
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .FlatStyle = FlatStyle.Flat,
-                .Size = New Size(32, 28),
-                .Location = New Point(760, 11)
+            btnRefreshUsers = New GlassButton With {
+                .Text = "🔄 Refresh",
+                .Size = New Size(95, 32),
+                .Location = New Point(820, 11)
             }
-            btnRefreshUsers.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnRefreshUsers.SetSecondaryStyle()
 
-            pnlUserActions.Controls.AddRange({txtSearchUser, lblR, cboRoleFilter, btnAddUser, btnEditUser, btnRefreshUsers})
+            pnlUserActions.Controls.AddRange({searchBoxUser, lblR, cboRoleFilter, btnAddUser, btnEditUser, btnRefreshUsers})
 
             dgvUsers = New DataGridView With {
                 .Dock = DockStyle.Fill,
-                .BackgroundColor = Color.White,
                 .BorderStyle = BorderStyle.None,
                 .AllowUserToAddRows = False,
                 .AllowUserToDeleteRows = False,
@@ -155,7 +234,10 @@ Namespace Controls.Views
                 .RowHeadersVisible = False,
                 .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvUsers)
+            ThemeManager.ApplyGlassGridStyle(dgvUsers)
+            ThemeManager.EnableDoubleBuffering(dgvUsers)
+
+            AddHandler dgvUsers.CellFormatting, AddressOf dgvUsers_CellFormatting
 
             tabUsers.Controls.Add(dgvUsers)
             tabUsers.Controls.Add(pnlUserActions)
@@ -163,41 +245,38 @@ Namespace Controls.Views
             AddHandler btnAddUser.Click, AddressOf btnAddUser_Click
             AddHandler btnEditUser.Click, AddressOf btnEditUser_Click
             AddHandler btnRefreshUsers.Click, Sub() LoadUsersData()
-            AddHandler txtSearchUser.TextChanged, Sub() ApplyUserFilter()
+            AddHandler searchBoxUser.SearchTextChanged, Sub() ApplyUserFilter()
             AddHandler cboRoleFilter.SelectedIndexChanged, Sub() ApplyUserFilter()
             AddHandler dgvUsers.SelectionChanged, AddressOf dgvUsers_SelectionChanged
         End Sub
 
         Private Sub InitializeAuditTab()
-            pnlAuditActions = New Panel With {
+            pnlAuditActions = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 50,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 10, 16, 10)
+                .Height = 58,
+                .Margin = New Padding(0, 0, 0, 8),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.AcademicGold,
+                .AccentHeight = 2
             }
 
-            txtSearchAudit = New TextBox With {
-                .Location = New Point(16, 13),
-                .Width = 260,
-                .PlaceholderText = "🔍 Search action, staff, entity..."
+            searchBoxAudit = New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Width = 320,
+                .PlaceholderText = "Search action, staff username, target..."
             }
 
-            btnRefreshAudit = New Button With {
-                .Text = "🔄 Refresh Audit Trail",
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.NavyPrimary,
-                .FlatStyle = FlatStyle.Flat,
-                .Font = New Font("Segoe UI", 8.5F),
-                .Size = New Size(150, 28),
-                .Location = New Point(290, 11)
+            btnRefreshAudit = New GlassButton With {
+                .Text = "🔄 Refresh Audit Logs",
+                .Size = New Size(170, 32),
+                .Location = New Point(350, 11)
             }
-            btnRefreshAudit.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnRefreshAudit.SetSecondaryStyle()
 
-            pnlAuditActions.Controls.AddRange({txtSearchAudit, btnRefreshAudit})
+            pnlAuditActions.Controls.AddRange({searchBoxAudit, btnRefreshAudit})
 
             dgvAudit = New DataGridView With {
                 .Dock = DockStyle.Fill,
-                .BackgroundColor = Color.White,
                 .BorderStyle = BorderStyle.None,
                 .AllowUserToAddRows = False,
                 .AllowUserToDeleteRows = False,
@@ -207,13 +286,16 @@ Namespace Controls.Views
                 .RowHeadersVisible = False,
                 .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvAudit)
+            ThemeManager.ApplyGlassGridStyle(dgvAudit)
+            ThemeManager.EnableDoubleBuffering(dgvAudit)
+
+            AddHandler dgvAudit.CellFormatting, AddressOf dgvAudit_CellFormatting
 
             tabAudit.Controls.Add(dgvAudit)
             tabAudit.Controls.Add(pnlAuditActions)
 
             AddHandler btnRefreshAudit.Click, Sub() LoadAuditData()
-            AddHandler txtSearchAudit.TextChanged, Sub() LoadAuditData()
+            AddHandler searchBoxAudit.SearchTextChanged, Sub() LoadAuditData()
         End Sub
 
         Public Sub LoadUsersData()
@@ -230,7 +312,7 @@ Namespace Controls.Views
         End Sub
 
         Private Sub ApplyUserFilter()
-            Dim search = txtSearchUser.Text.Trim().ToLowerInvariant()
+            Dim search = searchBoxUser.Text.Trim().ToLowerInvariant()
             Dim roleFilter = If(cboRoleFilter.SelectedItem IsNot Nothing, cboRoleFilter.SelectedItem.ToString(), "ALL ROLES")
 
             Dim filtered = _users.Where(Function(u)
@@ -245,7 +327,7 @@ Namespace Controls.Views
 
             dgvUsers.Columns.Clear()
             dgvUsers.Columns.Add("Id", "User ID")
-            dgvUsers.Columns("Id").Width = 60
+            dgvUsers.Columns("Id").Width = 70
 
             dgvUsers.Columns.Add("FullName", "Full Name")
             dgvUsers.Columns("FullName").Width = 180
@@ -259,11 +341,11 @@ Namespace Controls.Views
             dgvUsers.Columns.Add("Role", "Security Role")
             dgvUsers.Columns("Role").Width = 150
 
-            dgvUsers.Columns.Add("Status", "Status")
-            dgvUsers.Columns("Status").Width = 80
+            dgvUsers.Columns.Add("Status", "Account Status")
+            dgvUsers.Columns("Status").Width = 110
 
-            dgvUsers.Columns.Add("LastLogin", "Last Login")
-            dgvUsers.Columns("LastLogin").Width = 130
+            dgvUsers.Columns.Add("LastLogin", "Last Active Session")
+            dgvUsers.Columns("LastLogin").Width = 140
 
             For Each u In filtered
                 Dim rowIdx = dgvUsers.Rows.Add(
@@ -283,11 +365,11 @@ Namespace Controls.Views
 
         Public Sub LoadAuditData()
             Dim dt = _userRepo.GetActivityLogs(150)
-            Dim search = txtSearchAudit.Text.Trim().ToLowerInvariant()
+            Dim search = searchBoxAudit.Text.Trim().ToLowerInvariant()
 
             dgvAudit.Columns.Clear()
             dgvAudit.Columns.Add("Id", "Log ID")
-            dgvAudit.Columns("Id").Width = 60
+            dgvAudit.Columns("Id").Width = 70
 
             dgvAudit.Columns.Add("Timestamp", "Timestamp (UTC)")
             dgvAudit.Columns("Timestamp").Width = 140
@@ -299,13 +381,13 @@ Namespace Controls.Views
             dgvAudit.Columns("Action").Width = 150
 
             dgvAudit.Columns.Add("Entity", "Entity Target")
-            dgvAudit.Columns("Entity").Width = 120
+            dgvAudit.Columns("Entity").Width = 130
 
             dgvAudit.Columns.Add("Description", "Audit Narrative / Event Description")
             dgvAudit.Columns("Description").Width = 320
 
             dgvAudit.Columns.Add("Ip", "IP Address")
-            dgvAudit.Columns("Ip").Width = 90
+            dgvAudit.Columns("Ip").Width = 100
 
             For Each row As DataRow In dt.Rows
                 Dim desc = row("description").ToString()
@@ -334,60 +416,67 @@ Namespace Controls.Views
         End Sub
 
         Private Sub UpdateKpiCards()
-            pnlKpi.Controls.Clear()
             Dim totalUsers = _users.Count
             Dim activeUsers = _users.Where(Function(u) u.AccountStatus = "ACTIVE").Count()
-            Dim admins = _users.Where(Function(u) u.RoleName.Contains("ADMIN")).Count()
-            Dim officers = _users.Where(Function(u) u.RoleName.Contains("OFFICER")).Count()
+            Dim admins = _users.Where(Function(u) u.RoleName.ToUpperInvariant().Contains("ADMIN")).Count()
+            Dim officers = _users.Where(Function(u) u.RoleName.ToUpperInvariant().Contains("OFFICER")).Count()
 
-            Dim c1 = CreateKpiCard("TOTAL STAFF", totalUsers.ToString(), "Registered University Personnel", ThemeManager.NavyPrimary, 16)
-            Dim c2 = CreateKpiCard("ACTIVE ACCOUNTS", activeUsers.ToString(), "Operational Credentials", Color.FromArgb(5, 150, 105), 246)
-            Dim c3 = CreateKpiCard("ADMINISTRATORS", admins.ToString(), "SuperAdmin & Admin Privileges", Color.FromArgb(217, 119, 6), 476)
-            Dim c4 = CreateKpiCard("DESK OFFICERS", officers.ToString(), "Accommodation & Bursary Staff", Color.FromArgb(15, 118, 110), 706)
-
-            pnlKpi.Controls.AddRange({c1, c2, c3, c4})
+            kpiTotalUsers.PrimaryValue = totalUsers.ToString()
+            kpiActiveUsers.PrimaryValue = activeUsers.ToString()
+            kpiAdmins.PrimaryValue = admins.ToString()
+            kpiOfficers.PrimaryValue = officers.ToString()
         End Sub
 
-        Private Function CreateKpiCard(title As String, value As String, subText As String, accentColor As Color, xPos As Integer) As Panel
-            Dim pnl As New Panel With {
-                .Size = New Size(215, 68),
-                .Location = New Point(xPos, 8),
-                .BackColor = Color.White
-            }
+        Private Sub dgvUsers_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs)
+            If e.RowIndex < 0 Then Return
 
-            Dim pnlStripe As New Panel With {
-                .Dock = DockStyle.Left,
-                .Width = 4,
-                .BackColor = accentColor
-            }
+            Dim colName = dgvUsers.Columns(e.ColumnIndex).Name
+            If colName = "Status" AndAlso e.Value IsNot Nothing Then
+                Dim val = e.Value.ToString().ToUpperInvariant()
+                If val = "ACTIVE" Then
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusSuccess
+                    e.CellStyle.Font = New Font(dgvUsers.Font, FontStyle.Bold)
+                Else
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusDanger
+                    e.CellStyle.Font = New Font(dgvUsers.Font, FontStyle.Bold)
+                End If
+            ElseIf colName = "Role" AndAlso e.Value IsNot Nothing Then
+                Dim rVal = e.Value.ToString().ToUpperInvariant()
+                If rVal.Contains("ADMIN") Then
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusWarning
+                    e.CellStyle.Font = New Font(dgvUsers.Font, FontStyle.Bold)
+                Else
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusInfo
+                End If
+            ElseIf colName = "Id" Then
+                e.CellStyle.ForeColor = ThemeManager.AcademicGold
+                e.CellStyle.Font = New Font(dgvUsers.Font, FontStyle.Bold)
+            End If
+        End Sub
 
-            Dim lblT As New Label With {
-                .Text = title,
-                .Font = New Font("Segoe UI", 7.5F, FontStyle.Bold),
-                .ForeColor = Color.FromArgb(100, 116, 139),
-                .Location = New Point(12, 8),
-                .AutoSize = True
-            }
+        Private Sub dgvAudit_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs)
+            If e.RowIndex < 0 Then Return
 
-            Dim lblV As New Label With {
-                .Text = value,
-                .Font = New Font("Segoe UI", 14.0F, FontStyle.Bold),
-                .ForeColor = accentColor,
-                .Location = New Point(12, 24),
-                .AutoSize = True
-            }
-
-            Dim lblS As New Label With {
-                .Text = subText,
-                .Font = New Font("Segoe UI", 7.0F),
-                .ForeColor = Color.FromArgb(148, 163, 184),
-                .Location = New Point(12, 48),
-                .AutoSize = True
-            }
-
-            pnl.Controls.AddRange({pnlStripe, lblT, lblV, lblS})
-            Return pnl
-        End Function
+            Dim colName = dgvAudit.Columns(e.ColumnIndex).Name
+            If colName = "Action" AndAlso e.Value IsNot Nothing Then
+                Dim act = e.Value.ToString().ToUpperInvariant()
+                If act.Contains("CREATE") OrElse act.Contains("ALLOCATE") OrElse act.Contains("LOGIN") OrElse act.Contains("SUCCESS") Then
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusSuccess
+                    e.CellStyle.Font = New Font(dgvAudit.Font, FontStyle.Bold)
+                ElseIf act.Contains("DELETE") OrElse act.Contains("REVOKE") OrElse act.Contains("FAILED") Then
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusDanger
+                    e.CellStyle.Font = New Font(dgvAudit.Font, FontStyle.Bold)
+                ElseIf act.Contains("UPDATE") OrElse act.Contains("RESET") Then
+                    e.CellStyle.ForeColor = ThemeManager.GlassStatusWarning
+                    e.CellStyle.Font = New Font(dgvAudit.Font, FontStyle.Bold)
+                Else
+                    e.CellStyle.ForeColor = ThemeManager.TextPlatinum
+                End If
+            ElseIf colName = "Id" Then
+                e.CellStyle.ForeColor = ThemeManager.AcademicGold
+                e.CellStyle.Font = New Font(dgvAudit.Font, FontStyle.Bold)
+            End If
+        End Sub
 
         Private Sub dgvUsers_SelectionChanged(sender As Object, e As EventArgs)
             If dgvUsers.SelectedRows.Count > 0 Then

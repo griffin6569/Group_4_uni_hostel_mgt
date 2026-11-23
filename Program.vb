@@ -415,7 +415,7 @@ Public Module Program
                 dash.Close()
             End Using
         Catch ex As Exception
-            Console.WriteLine($"      ✗ Error capturing dashboard views: {ex.Message}")
+            Console.WriteLine($"      ✗ Error capturing dashboard views: {ex}")
         End Try
 
         ' 11. Capture Room Image Gallery Modal

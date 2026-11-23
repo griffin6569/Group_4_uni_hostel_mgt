@@ -2,6 +2,7 @@ Imports System
 Imports System.Collections.Generic
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports University_hostel_mgt.Controls
 Imports University_hostel_mgt.Data.Repositories
 Imports University_hostel_mgt.Forms.Billing
 Imports University_hostel_mgt.Helpers
@@ -9,26 +10,27 @@ Imports University_hostel_mgt.Models
 
 Namespace Controls.Views
     ''' <summary>
-    ''' Financial ledger and bursar fee collection module with receipt preview and payment verification.
+    ''' Bursar Financial Ledger & Student Billing Control.
+    ''' Manages accommodation fee collections, payment methods, transaction references,
+    ''' receipt issuance, and student arrears tracking.
+    ''' Built strictly with Option B: Frosted Glassmorphism & Acrylic design system.
     ''' </summary>
     Public Class BillingControl
         Inherits UserControl
 
         Private ReadOnly _paymentRepo As New PaymentRepository()
         Private ReadOnly _semesterRepo As New SemesterRepository()
-
-        Private _paymentList As New List(Of Payment)()
         Private _currentUserId As Integer = 1
+        Private _paymentList As New List(Of Payment)()
 
-        ' KPI Metrics
+        ' UI Components
         Private pnlMetricsRow As TableLayoutPanel
-        Private lblBilledVal As Label
-        Private lblPaidVal As Label
-        Private lblArrearsVal As Label
-        Private lblCountVal As Label
+        Private kpiBilled As GlassKpiWidget
+        Private kpiPaid As GlassKpiWidget
+        Private kpiArrears As GlassKpiWidget
+        Private kpiReceipts As GlassKpiWidget
 
-        ' Filter Controls
-        Private pnlFilterBar As Panel
+        Private pnlFilterBar As PrestigeGlassCard
         Private txtSearch As TextBox
         Private cboSemesterFilter As ComboBox
         Private cboMethodFilter As ComboBox
@@ -56,17 +58,18 @@ Namespace Controls.Views
 
         Private Sub InitializeComponents()
             Me.Dock = DockStyle.Fill
-            Me.BackColor = ThemeManager.SurfaceCanvas
+            Me.BackColor = ThemeManager.CanvasDark
             Me.Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
 
             ' =========================================================================
-            ' TOP KPI SUMMARY ROW
+            ' TOP KPI SUMMARY ROW (4 Frosted Glass Widgets)
             ' =========================================================================
             pnlMetricsRow = New TableLayoutPanel With {
                 .Dock = DockStyle.Top,
-                .Height = 88,
+                .Height = 100,
                 .ColumnCount = 4,
                 .RowCount = 1,
+                .BackColor = ThemeManager.CanvasDark,
                 .Padding = New Padding(16, 12, 16, 8)
             }
             pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
@@ -74,62 +77,95 @@ Namespace Controls.Views
             pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
             pnlMetricsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
 
-            Dim cardBilled = CreateMiniCard("SEMESTER REVENUE BILLED", ThemeManager.NavyPrimary)
-            lblBilledVal = CreateMiniValLabel("KES 0.00", ThemeManager.TextDeepSlate)
-            cardBilled.Controls.Add(lblBilledVal)
-
-            Dim cardPaid = CreateMiniCard("PAYMENTS COLLECTED", ThemeManager.StatusSuccess)
-            lblPaidVal = CreateMiniValLabel("KES 0.00", ThemeManager.StatusSuccess)
-            cardPaid.Controls.Add(lblPaidVal)
-
-            Dim cardArrears = CreateMiniCard("OUTSTANDING ARREARS", ThemeManager.StatusDanger)
-            lblArrearsVal = CreateMiniValLabel("KES 0.00", ThemeManager.StatusDanger)
-            cardArrears.Controls.Add(lblArrearsVal)
-
-            Dim cardCount = CreateMiniCard("RECEIPTS ISSUED", ThemeManager.AcademicGold)
-            lblCountVal = CreateMiniValLabel("0 Confirmed", ThemeManager.AcademicGold)
-            cardCount.Controls.Add(lblCountVal)
-
-            pnlMetricsRow.Controls.Add(cardBilled, 0, 0)
-            pnlMetricsRow.Controls.Add(cardPaid, 1, 0)
-            pnlMetricsRow.Controls.Add(cardArrears, 2, 0)
-            pnlMetricsRow.Controls.Add(cardCount, 3, 0)
-
-            ' =========================================================================
-            ' FILTER / ACTION BAR
-            ' =========================================================================
-            pnlFilterBar = New Panel With {
-                .Dock = DockStyle.Top,
-                .Height = 56,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 12, 16, 12)
+            kpiBilled = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(0, 0, 6, 0),
+                .CategoryTitle = "SEMESTER REVENUE BILLED",
+                .PrimaryValue = "KES 0.00",
+                .Subtitle = "Invoiced resident fees",
+                .AccentColor = ThemeManager.GlassStatusInfo,
+                .IconSymbol = "📋"
             }
-            AddHandler pnlFilterBar.Paint, Sub(s, e)
-                                               Using pen As New Pen(ThemeManager.BorderSubtle, 1.0F)
-                                                   e.Graphics.DrawLine(pen, 0, pnlFilterBar.Height - 1, pnlFilterBar.Width, pnlFilterBar.Height - 1)
-                                               End Using
-                                           End Sub
+
+            kpiPaid = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "PAYMENTS COLLECTED",
+                .PrimaryValue = "KES 0.00",
+                .Subtitle = "Cleared student revenue",
+                .AccentColor = ThemeManager.GlassStatusSuccess,
+                .ValueColor = ThemeManager.GlassStatusSuccess,
+                .IconSymbol = "💰"
+            }
+
+            kpiArrears = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "OUTSTANDING ARREARS",
+                .PrimaryValue = "KES 0.00",
+                .Subtitle = "Unpaid resident balances",
+                .AccentColor = ThemeManager.GlassStatusDanger,
+                .ValueColor = ThemeManager.GlassStatusDanger,
+                .IconSymbol = "⚠️"
+            }
+
+            kpiReceipts = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(6, 0, 0, 0),
+                .CategoryTitle = "RECEIPTS ISSUED",
+                .PrimaryValue = "0",
+                .Subtitle = "Cleared audit transactions",
+                .AccentColor = ThemeManager.GlassStatusWarning,
+                .ValueColor = ThemeManager.GlassStatusWarning,
+                .IconSymbol = "🧾"
+            }
+
+            pnlMetricsRow.Controls.Add(kpiBilled, 0, 0)
+            pnlMetricsRow.Controls.Add(kpiPaid, 1, 0)
+            pnlMetricsRow.Controls.Add(kpiArrears, 2, 0)
+            pnlMetricsRow.Controls.Add(kpiReceipts, 3, 0)
+
+            ' =========================================================================
+            ' FILTER / ACTION BAR (Frosted Glass Card)
+            ' =========================================================================
+            pnlFilterBar = New PrestigeGlassCard With {
+                .Dock = DockStyle.Top,
+                .Height = 58,
+                .Margin = New Padding(16, 0, 16, 6),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
+            }
+
+            Dim txtSearchControl As New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Size = New Size(220, 34),
+                .Placeholder = "Search Receipt, Resident, Ref..."
+            }
+            AddHandler txtSearchControl.SearchTextChanged, Sub()
+                                                               txtSearch.Text = txtSearchControl.QueryText
+                                                               ApplyFilters()
+                                                           End Sub
 
             txtSearch = New TextBox With {
-                .Location = New Point(16, 14),
-                .Size = New Size(220, 26),
-                .PlaceholderText = "🔍  Search Receipt, Student, Ref...",
-                .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular)
+                .Visible = False
             }
-            AddHandler txtSearch.TextChanged, Sub() ApplyFilters()
 
             Dim lblSem As New Label With {
                 .Text = "Term:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(245, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(248, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboSemesterFilter = New ComboBox With {
-                .Location = New Point(285, 15),
-                .Size = New Size(160, 24),
+                .Location = New Point(288, 15),
+                .Size = New Size(150, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             AddHandler cboSemesterFilter.SelectedIndexChanged, Sub() ApplyFilters()
@@ -137,15 +173,18 @@ Namespace Controls.Views
             Dim lblMethod As New Label With {
                 .Text = "Method:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(455, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(448, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboMethodFilter = New ComboBox With {
-                .Location = New Point(510, 15),
+                .Location = New Point(505, 15),
                 .Size = New Size(130, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboMethodFilter.Items.AddRange(New Object() {"ALL METHODS", "MPESA", "BANK", "CASH", "OTHER"})
@@ -154,10 +193,10 @@ Namespace Controls.Views
 
             btnNewPayment = New Button With {
                 .Text = "＋ Record Payment",
-                .Size = New Size(150, 30),
-                .Location = New Point(pnlFilterBar.Width - 340, 13),
+                .Size = New Size(150, 32),
+                .Location = New Point(pnlFilterBar.Width - 340, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = ThemeManager.NavyDark,
+                .BackColor = Color.FromArgb(16, 185, 129),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
@@ -168,33 +207,34 @@ Namespace Controls.Views
 
             btnViewReceipt = New Button With {
                 .Text = "🖨️  View Receipt",
-                .Size = New Size(130, 30),
-                .Location = New Point(pnlFilterBar.Width - 180, 13),
+                .Size = New Size(130, 32),
+                .Location = New Point(pnlFilterBar.Width - 180, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 58, 138),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnViewReceipt.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnViewReceipt.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnViewReceipt.FlatAppearance.BorderSize = 1
             AddHandler btnViewReceipt.Click, AddressOf BtnViewReceipt_Click
 
             btnRefresh = New Button With {
                 .Text = "↻",
-                .Size = New Size(34, 30),
-                .Location = New Point(pnlFilterBar.Width - 40, 13),
+                .Size = New Size(34, 32),
+                .Location = New Point(pnlFilterBar.Width - 40, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.5!, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnRefresh.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnRefresh.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnRefresh.Click, Sub() LoadBillingData()
 
-            pnlFilterBar.Controls.AddRange({txtSearch, lblSem, cboSemesterFilter, lblMethod, cboMethodFilter, btnNewPayment, btnViewReceipt, btnRefresh})
+            pnlFilterBar.Controls.AddRange({txtSearchControl, txtSearch, lblSem, cboSemesterFilter, lblMethod, cboMethodFilter, btnNewPayment, btnViewReceipt, btnRefresh})
 
             ' =========================================================================
             ' PAYMENTS DATA GRID
@@ -202,7 +242,7 @@ Namespace Controls.Views
             dgvPayments = New DataGridView With {
                 .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvPayments)
+            ThemeManager.ApplyGlassGridStyle(dgvPayments)
             SetupGridColumns()
 
             AddHandler dgvPayments.CellDoubleClick, Sub(s, e)
@@ -213,7 +253,8 @@ Namespace Controls.Views
 
             Dim pnlGridContainer As New Panel With {
                 .Dock = DockStyle.Fill,
-                .Padding = New Padding(16)
+                .Padding = New Padding(16, 0, 16, 16),
+                .BackColor = ThemeManager.CanvasDark
             }
             pnlGridContainer.Controls.Add(dgvPayments)
 
@@ -221,44 +262,6 @@ Namespace Controls.Views
             Me.Controls.Add(pnlFilterBar)
             Me.Controls.Add(pnlMetricsRow)
         End Sub
-
-        Private Function CreateMiniCard(title As String, accentColor As Color) As Panel
-            Dim pnl As New Panel With {
-                .Dock = DockStyle.Fill,
-                .BackColor = Color.White,
-                .Margin = New Padding(4, 0, 4, 0),
-                .Padding = New Padding(12, 8, 12, 8)
-            }
-            Dim topBar As New Panel With {.Dock = DockStyle.Top, .Height = 3, .BackColor = accentColor}
-            Dim lblTitle As New Label With {
-                .Text = title,
-                .Font = New Font("Segoe UI Semibold", 7.5!, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateMuted,
-                .Dock = DockStyle.Top,
-                .Height = 16,
-                .UseMnemonic = False
-            }
-            pnl.Controls.Add(lblTitle)
-            pnl.Controls.Add(topBar)
-            AddHandler pnl.Paint, Sub(s, e)
-                                      Using pen As New Pen(ThemeManager.BorderSubtle, 1.0F)
-                                          e.Graphics.DrawRectangle(pen, 0, 0, pnl.Width - 1, pnl.Height - 1)
-                                      End Using
-                                  End Sub
-            Return pnl
-        End Function
-
-        Private Function CreateMiniValLabel(text As String, foreColor As Color) As Label
-            Return New Label With {
-                .Text = text,
-                .Font = New Font("Segoe UI", 12.5!, FontStyle.Bold),
-                .ForeColor = foreColor,
-                .Location = New Point(10, 26),
-                .Size = New Size(200, 24),
-                .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
-                .UseMnemonic = False
-            }
-        End Function
 
         Private Sub SetupGridColumns()
             dgvPayments.Columns.Clear()
@@ -297,10 +300,10 @@ Namespace Controls.Views
 
                 ' Update KPI Summary
                 Dim fin = _paymentRepo.GetFinancialSummary(selectedSemId)
-                lblBilledVal.Text = $"KES {fin.TotalBilled:N2}"
-                lblPaidVal.Text = $"KES {fin.TotalPaid:N2}"
-                lblArrearsVal.Text = $"KES {fin.TotalArrears:N2}"
-                lblCountVal.Text = $"{fin.ConfirmedCount} Receipts"
+                kpiBilled.PrimaryValue = $"KES {fin.TotalBilled:N2}"
+                kpiPaid.PrimaryValue = $"KES {fin.TotalPaid:N2}"
+                kpiArrears.PrimaryValue = $"KES {fin.TotalArrears:N2}"
+                kpiReceipts.PrimaryValue = $"{fin.ConfirmedCount:N0}"
 
                 _paymentList = _paymentRepo.GetPayments(semesterId:=selectedSemId)
                 ApplyFilters()
@@ -340,30 +343,26 @@ Namespace Controls.Views
                     p.PaymentStatus
                 )
 
-                dgvPayments.Rows(rowIdx).Cells("Amount").Style.ForeColor = ThemeManager.StatusSuccess
+                dgvPayments.Rows(rowIdx).Cells("Amount").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 If p.PaymentStatus = "CONFIRMED" Then
-                    dgvPayments.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.NavyPrimary
+                    dgvPayments.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 ElseIf p.PaymentStatus = "REVERSED" Then
-                    dgvPayments.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.StatusDanger
+                    dgvPayments.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusDanger
                 End If
             Next
         End Sub
 
-        Public Sub OpenNewPaymentModal(Optional preselectedAllocId As Integer? = Nothing)
-            Using modal As New frmPaymentModal(preselectedAllocId, _currentUserId)
+        Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs)
+            Using modal As New frmPaymentModal(_currentUserId)
                 If modal.ShowDialog(Me.FindForm()) = DialogResult.OK Then
                     LoadBillingData()
                 End If
             End Using
         End Sub
 
-        Private Sub BtnNewPayment_Click(sender As Object, e As EventArgs)
-            OpenNewPaymentModal()
-        End Sub
-
         Private Sub BtnViewReceipt_Click(sender As Object, e As EventArgs)
             If dgvPayments.SelectedRows.Count = 0 Then
-                MessageBox.Show("Please select a payment record from the table to preview its electronic receipt.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Please select a payment transaction record to preview receipt.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
@@ -374,4 +373,3 @@ Namespace Controls.Views
         End Sub
     End Class
 End Namespace
-

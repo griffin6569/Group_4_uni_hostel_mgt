@@ -58,41 +58,47 @@ Namespace Controls.Views
 
         Private Sub InitializeComponents()
             Me.Dock = DockStyle.Fill
-            Me.BackColor = ThemeManager.SurfaceCanvas
+            Me.BackColor = ThemeManager.CanvasDark
             Me.Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
 
-            pnlFilterBar = New Panel With {
+            pnlFilterBar = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 56,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 12, 16, 12)
+                .Height = 58,
+                .Margin = New Padding(16, 12, 16, 6),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
             }
-            AddHandler pnlFilterBar.Paint, Sub(s, e)
-                                               Using pen As New Pen(ThemeManager.BorderSubtle, 1.0F)
-                                                   e.Graphics.DrawLine(pen, 0, pnlFilterBar.Height - 1, pnlFilterBar.Width, pnlFilterBar.Height - 1)
-                                               End Using
-                                           End Sub
+
+            Dim txtSearchControl As New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Size = New Size(185, 34),
+                .Placeholder = "Search Student / Bed..."
+            }
+            AddHandler txtSearchControl.SearchTextChanged, Sub()
+                                                               txtSearch.Text = txtSearchControl.QueryText
+                                                               ApplyFilters()
+                                                           End Sub
 
             txtSearch = New TextBox With {
-                .Location = New Point(16, 14),
-                .Size = New Size(180, 26),
-                .PlaceholderText = "🔍  Search Student / Bed...",
-                .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular)
+                .Visible = False
             }
-            AddHandler txtSearch.TextChanged, Sub() ApplyFilters()
 
             Dim lblSem As New Label With {
                 .Text = "Term:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(202, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(210, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboSemesterFilter = New ComboBox With {
-                .Location = New Point(242, 15),
-                .Size = New Size(150, 24),
+                .Location = New Point(252, 15),
+                .Size = New Size(145, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             AddHandler cboSemesterFilter.SelectedIndexChanged, Sub() ApplyFilters()
@@ -100,15 +106,18 @@ Namespace Controls.Views
             Dim lblHostel As New Label With {
                 .Text = "Hostel:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(398, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(404, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboHostelFilter = New ComboBox With {
-                .Location = New Point(444, 15),
-                .Size = New Size(140, 24),
+                .Location = New Point(450, 15),
+                .Size = New Size(135, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             AddHandler cboHostelFilter.SelectedIndexChanged, Sub() ApplyFilters()
@@ -116,15 +125,18 @@ Namespace Controls.Views
             Dim lblStatus As New Label With {
                 .Text = "Status:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(590, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(592, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboStatusFilter = New ComboBox With {
-                .Location = New Point(634, 15),
+                .Location = New Point(636, 15),
                 .Size = New Size(115, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboStatusFilter.Items.AddRange(New Object() {"ALL STATUSES", "ACTIVE", "CHECKED_OUT", "TRANSFERRED", "CANCELLED"})
@@ -134,66 +146,67 @@ Namespace Controls.Views
             ' Action buttons
             btnNewAllocation = New Button With {
                 .Text = "＋ Allocate Bed",
-                .Size = New Size(125, 30),
-                .Location = New Point(pnlFilterBar.Width - 530, 13),
+                .Size = New Size(125, 32),
+                .Location = New Point(pnlFilterBar.Width - 520, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = ThemeManager.NavyDark,
+                .BackColor = Color.FromArgb(30, 58, 138),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnNewAllocation.FlatAppearance.BorderSize = 0
+            btnNewAllocation.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnNewAllocation.FlatAppearance.BorderSize = 1
             AddHandler btnNewAllocation.Click, AddressOf BtnNewAllocation_Click
 
             btnCheckIn = New Button With {
                 .Text = "✓ Check-In",
-                .Size = New Size(95, 30),
-                .Location = New Point(pnlFilterBar.Width - 400, 13),
+                .Size = New Size(95, 32),
+                .Location = New Point(pnlFilterBar.Width - 390, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnCheckIn.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnCheckIn.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnCheckIn.Click, AddressOf BtnCheckIn_Click
 
             btnTransfer = New Button With {
                 .Text = "↗ Transfer",
-                .Size = New Size(90, 30),
-                .Location = New Point(pnlFilterBar.Width - 300, 13),
+                .Size = New Size(90, 32),
+                .Location = New Point(pnlFilterBar.Width - 290, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnTransfer.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnTransfer.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnTransfer.Click, AddressOf BtnTransfer_Click
 
             btnCheckOut = New Button With {
                 .Text = "🚪 Check-Out",
-                .Size = New Size(100, 30),
-                .Location = New Point(pnlFilterBar.Width - 205, 13),
+                .Size = New Size(100, 32),
+                .Location = New Point(pnlFilterBar.Width - 195, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnCheckOut.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnCheckOut.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnCheckOut.Click, AddressOf BtnCheckOut_Click
 
             btnPay = New Button With {
                 .Text = "💳 Pay",
-                .Size = New Size(60, 30),
-                .Location = New Point(pnlFilterBar.Width - 100, 13),
+                .Size = New Size(70, 32),
+                .Location = New Point(pnlFilterBar.Width - 90, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = ThemeManager.AcademicGold,
+                .BackColor = Color.FromArgb(16, 185, 129),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
@@ -204,24 +217,24 @@ Namespace Controls.Views
 
             btnRefresh = New Button With {
                 .Text = "↻",
-                .Size = New Size(32, 30),
-                .Location = New Point(pnlFilterBar.Width - 35, 13),
+                .Size = New Size(32, 32),
+                .Location = New Point(pnlFilterBar.Width - 35, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.5!, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnRefresh.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnRefresh.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnRefresh.Click, Sub() LoadAllocationsData()
 
-            pnlFilterBar.Controls.AddRange({txtSearch, lblSem, cboSemesterFilter, lblHostel, cboHostelFilter, lblStatus, cboStatusFilter, btnNewAllocation, btnCheckIn, btnTransfer, btnCheckOut, btnPay, btnRefresh})
+            pnlFilterBar.Controls.AddRange({txtSearchControl, txtSearch, lblSem, cboSemesterFilter, lblHostel, cboHostelFilter, lblStatus, cboStatusFilter, btnNewAllocation, btnCheckIn, btnTransfer, btnCheckOut, btnPay, btnRefresh})
 
             dgvAllocations = New DataGridView With {
                 .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvAllocations)
+            ThemeManager.ApplyGlassGridStyle(dgvAllocations)
             SetupGridColumns()
 
             Dim pnlGridContainer As New Panel With {
@@ -314,17 +327,19 @@ Namespace Controls.Views
                 )
 
                 If a.BalanceOwed <= 0 Then
-                    dgvAllocations.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.StatusSuccess
+                    dgvAllocations.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 Else
-                    dgvAllocations.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.StatusWarning
+                    dgvAllocations.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.GlassStatusWarning
                 End If
 
                 If a.AllocationStatus = "ACTIVE" Then
-                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.NavyPrimary
+                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 ElseIf a.AllocationStatus = "CHECKED_OUT" Then
-                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.TextSlateMuted
+                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.TextMutedSlate
                 ElseIf a.AllocationStatus = "TRANSFERRED" Then
-                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.StatusInfo
+                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusInfo
+                ElseIf a.AllocationStatus = "CANCELLED" Then
+                    dgvAllocations.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusDanger
                 End If
             Next
         End Sub

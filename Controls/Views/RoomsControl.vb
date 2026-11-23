@@ -46,41 +46,47 @@ Namespace Controls.Views
 
         Private Sub InitializeComponents()
             Me.Dock = DockStyle.Fill
-            Me.BackColor = ThemeManager.SurfaceCanvas
+            Me.BackColor = ThemeManager.CanvasDark
             Me.Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
 
-            pnlFilterBar = New Panel With {
+            pnlFilterBar = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 56,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 12, 16, 12)
+                .Height = 58,
+                .Margin = New Padding(16, 12, 16, 6),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
             }
-            AddHandler pnlFilterBar.Paint, Sub(s, e)
-                                               Using pen As New Pen(ThemeManager.BorderSubtle, 1.0F)
-                                                   e.Graphics.DrawLine(pen, 0, pnlFilterBar.Height - 1, pnlFilterBar.Width, pnlFilterBar.Height - 1)
-                                               End Using
-                                           End Sub
+
+            Dim txtSearchControl As New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Size = New Size(210, 34),
+                .Placeholder = "Search Room / Hostel..."
+            }
+            AddHandler txtSearchControl.SearchTextChanged, Sub()
+                                                               txtSearch.Text = txtSearchControl.QueryText
+                                                               ApplyFilters()
+                                                           End Sub
 
             txtSearch = New TextBox With {
-                .Location = New Point(16, 14),
-                .Size = New Size(200, 26),
-                .PlaceholderText = "🔍  Search Room / Hostel...",
-                .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular)
+                .Visible = False
             }
-            AddHandler txtSearch.TextChanged, Sub() ApplyFilters()
 
             Dim lblHostel As New Label With {
                 .Text = "Hostel:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(226, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(236, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboHostelFilter = New ComboBox With {
-                .Location = New Point(275, 15),
-                .Size = New Size(170, 24),
+                .Location = New Point(285, 15),
+                .Size = New Size(160, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             AddHandler cboHostelFilter.SelectedIndexChanged, Sub() ApplyFilters()
@@ -88,15 +94,18 @@ Namespace Controls.Views
             Dim lblType As New Label With {
                 .Text = "Type:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(455, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(455, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboRoomTypeFilter = New ComboBox With {
                 .Location = New Point(495, 15),
                 .Size = New Size(115, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboRoomTypeFilter.Items.AddRange(New Object() {"ALL TYPES", "STANDARD", "DELUXE", "STUDIO"})
@@ -106,15 +115,18 @@ Namespace Controls.Views
             Dim lblStatus As New Label With {
                 .Text = "Status:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = Point.Add(New Point(620, 18), New Size(0, 0)),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(620, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboStatusFilter = New ComboBox With {
                 .Location = New Point(668, 15),
                 .Size = New Size(120, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboStatusFilter.Items.AddRange(New Object() {"ALL STATUSES", "AVAILABLE", "OCCUPIED", "MAINTENANCE", "INACTIVE"})
@@ -123,66 +135,67 @@ Namespace Controls.Views
 
             btnNewRoom = New Button With {
                 .Text = "＋ Add Room",
-                .Size = New Size(130, 30),
-                .Location = New Point(pnlFilterBar.Width - 340, 13),
+                .Size = New Size(125, 32),
+                .Location = New Point(pnlFilterBar.Width - 365, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = ThemeManager.NavyDark,
+                .BackColor = Color.FromArgb(30, 58, 138),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnNewRoom.FlatAppearance.BorderSize = 0
+            btnNewRoom.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnNewRoom.FlatAppearance.BorderSize = 1
             AddHandler btnNewRoom.Click, AddressOf BtnNewRoom_Click
 
             btnEditRoom = New Button With {
                 .Text = "✎ Edit Selected",
-                .Size = New Size(110, 30),
-                .Location = New Point(pnlFilterBar.Width - 215, 13),
+                .Size = New Size(115, 32),
+                .Location = New Point(pnlFilterBar.Width - 235, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnEditRoom.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnEditRoom.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnEditRoom.Click, AddressOf BtnEditRoom_Click
 
             btnGallery = New Button With {
                 .Text = "📷 Photos",
-                .Size = New Size(95, 30),
-                .Location = New Point(pnlFilterBar.Width - 100, 13),
+                .Size = New Size(95, 32),
+                .Location = New Point(pnlFilterBar.Width - 115, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.NavyPrimary,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.GlassStatusInfo,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnGallery.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnGallery.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnGallery.Click, AddressOf BtnGallery_Click
 
             btnRefresh = New Button With {
                 .Text = "↻",
-                .Size = New Size(34, 30),
-                .Location = New Point(pnlFilterBar.Width - 45, 13),
+                .Size = New Size(34, 32),
+                .Location = New Point(pnlFilterBar.Width - 50, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 10.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnRefresh.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnRefresh.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnRefresh.Click, Sub() LoadRoomsData()
 
-            pnlFilterBar.Controls.AddRange({txtSearch, lblHostel, cboHostelFilter, lblType, cboRoomTypeFilter, lblStatus, cboStatusFilter, btnNewRoom, btnEditRoom, btnGallery, btnRefresh})
+            pnlFilterBar.Controls.AddRange({txtSearchControl, txtSearch, lblHostel, cboHostelFilter, lblType, cboRoomTypeFilter, lblStatus, cboStatusFilter, btnNewRoom, btnEditRoom, btnGallery, btnRefresh})
 
             dgvRooms = New DataGridView With {
                 .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvRooms)
+            ThemeManager.ApplyGlassGridStyle(dgvRooms)
             SetupGridColumns()
 
             AddHandler dgvRooms.CellDoubleClick, Sub(s, e)

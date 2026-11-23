@@ -3,6 +3,7 @@ Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Windows.Forms
+Imports University_hostel_mgt.Controls
 Imports University_hostel_mgt.Data.Repositories
 Imports University_hostel_mgt.Forms.Reports
 Imports University_hostel_mgt.Helpers
@@ -12,8 +13,9 @@ Imports University_hostel_mgt.Services
 Namespace Controls.Views
     ''' <summary>
     ''' Executive Institutional Reporting & Analytics Control.
-    ''' Provides report selection, dynamic scope filtering, data grid previews,
-    ''' and integration with the printing and web document export engines.
+    ''' Provides report selection via interactive frosted glass cards, dynamic scope filtering,
+    ''' high-contrast data grid previews, and integration with the printing and web document export engines.
+    ''' Built strictly with Option B: Frosted Glassmorphism & Acrylic design system.
     ''' </summary>
     Public Class ReportsControl
         Inherits UserControl
@@ -22,26 +24,25 @@ Namespace Controls.Views
         Private ReadOnly _hostelRepo As New HostelRepository()
         Private ReadOnly _semesterRepo As New SemesterRepository()
 
-        Private pnlFilter As Panel
+        Private cardFilter As PrestigeGlassCard
         Private cboSemester As ComboBox
         Private cboHostel As ComboBox
         Private chkDefaultersOnly As CheckBox
         Private cboMaintenanceStatus As ComboBox
-        Private lblFilterInfo As Label
 
-        Private pnlCards As Panel
-        Private cardOccupancy As Panel
-        Private cardAllocations As Panel
-        Private cardFinancial As Panel
-        Private cardMaintenance As Panel
+        Private pnlCardsRow As TableLayoutPanel
+        Private cardOccupancy As PrestigeGlassCard
+        Private cardAllocations As PrestigeGlassCard
+        Private cardFinancial As PrestigeGlassCard
+        Private cardMaintenance As PrestigeGlassCard
 
-        Private pnlSummaryStrip As Panel
+        Private cardSummaryStrip As PrestigeGlassCard
         Private lblMetric1 As Label
         Private lblMetric2 As Label
         Private lblMetric3 As Label
 
         Private dgvPreview As DataGridView
-        Private pnlBottomActions As Panel
+        Private cardBottomActions As PrestigeGlassCard
         Private btnPreviewReport As Button
         Private btnExportHtml As Button
         Private btnRefreshData As Button
@@ -52,142 +53,206 @@ Namespace Controls.Views
         Public Sub New()
             InitializeUI()
             Dock = DockStyle.Fill
-            BackColor = Color.FromArgb(248, 250, 252)
+            BackColor = ThemeManager.CanvasDark
         End Sub
 
         Private Sub InitializeUI()
             Me.SuspendLayout()
 
-            ' 1. Top Filter Panel
-            pnlFilter = New Panel With {
+            ' 1. Top Filter Frosted Card
+            cardFilter = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 56,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 10, 16, 10)
+                .Height = 58,
+                .Margin = New Padding(16, 12, 16, 6),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
             }
 
-            Dim lblSem As New Label With {.Text = "Semester:", .AutoSize = True, .Location = New Point(16, 18), .Font = New Font("Segoe UI Semibold", 9.0F)}
-            cboSemester = New ComboBox With {.Location = New Point(85, 15), .Width = 190, .DropDownStyle = ComboBoxStyle.DropDownList}
+            Dim lblSem As New Label With {
+                .Text = "Semester:",
+                .AutoSize = True,
+                .Location = New Point(16, 18),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .BackColor = Color.Transparent
+            }
 
-            Dim lblHostel As New Label With {.Text = "Hostel:", .AutoSize = True, .Location = New Point(295, 18), .Font = New Font("Segoe UI Semibold", 9.0F)}
-            cboHostel = New ComboBox With {.Location = New Point(345, 15), .Width = 170, .DropDownStyle = ComboBoxStyle.DropDownList}
+            cboSemester = New ComboBox With {
+                .Location = New Point(85, 14),
+                .Width = 190,
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White
+            }
+
+            Dim lblHostel As New Label With {
+                .Text = "Hostel:",
+                .AutoSize = True,
+                .Location = New Point(290, 18),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .BackColor = Color.Transparent
+            }
+
+            cboHostel = New ComboBox With {
+                .Location = New Point(340, 14),
+                .Width = 170,
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White
+            }
 
             chkDefaultersOnly = New CheckBox With {
                 .Text = "⚠️ Defaulters Only (Bal > 0)",
                 .AutoSize = True,
-                .Location = New Point(535, 18),
-                .Font = New Font("Segoe UI Semibold", 8.5F),
-                .ForeColor = Color.FromArgb(185, 28, 28),
+                .Location = New Point(525, 16),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.GlassStatusDanger,
                 .Visible = False
             }
 
             cboMaintenanceStatus = New ComboBox With {
-                .Location = New Point(535, 15),
+                .Location = New Point(525, 14),
                 .Width = 150,
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Visible = False
             }
             cboMaintenanceStatus.Items.AddRange({"ALL", "REPORTED", "IN_PROGRESS", "RESOLVED"})
             cboMaintenanceStatus.SelectedIndex = 0
 
-            pnlFilter.Controls.AddRange({lblSem, cboSemester, lblHostel, cboHostel, chkDefaultersOnly, cboMaintenanceStatus})
+            cardFilter.Controls.AddRange({lblSem, cboSemester, lblHostel, cboHostel, chkDefaultersOnly, cboMaintenanceStatus})
 
-            ' 2. Report Category Cards Strip
-            pnlCards = New Panel With {
+            ' 2. Report Category Cards Row (Responsive 4-Card Grid)
+            pnlCardsRow = New TableLayoutPanel With {
                 .Dock = DockStyle.Top,
-                .Height = 100,
-                .BackColor = Color.FromArgb(248, 250, 252),
-                .Padding = New Padding(16, 8, 16, 8)
+                .Height = 88,
+                .ColumnCount = 4,
+                .RowCount = 1,
+                .BackColor = ThemeManager.CanvasDark,
+                .Padding = New Padding(16, 4, 16, 4)
             }
+            pnlCardsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlCardsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlCardsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlCardsRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
 
             cardOccupancy = CreateReportCard("🏢 Occupancy Matrix", "Room Capacities & Vacancies", InstitutionalReportGenerator.ReportKind.Occupancy)
-            cardAllocations = CreateReportCard("📋 Active Allocations", "Current Resident Schedule", InstitutionalReportGenerator.ReportKind.Allocations)
-            cardFinancial = CreateReportCard("💳 Bursar Defaulters", "Fee Arrears & Balances", InstitutionalReportGenerator.ReportKind.FinancialDefaulters)
-            cardMaintenance = CreateReportCard("🔧 Maintenance Logs", "Repair Logs & Downtime", InstitutionalReportGenerator.ReportKind.Maintenance)
+            cardAllocations = CreateReportCard("📋 Active Allocations", "Resident Semester Schedule", InstitutionalReportGenerator.ReportKind.Allocations)
+            cardFinancial = CreateReportCard("💳 Bursar Defaulters", "Fee Arrears & Balances Due", InstitutionalReportGenerator.ReportKind.FinancialDefaulters)
+            cardMaintenance = CreateReportCard("🔧 Maintenance Logs", "Repair Logs & Defect Downtime", InstitutionalReportGenerator.ReportKind.Maintenance)
 
-            cardOccupancy.Location = New Point(16, 10)
-            cardAllocations.Location = New Point(266, 10)
-            cardFinancial.Location = New Point(516, 10)
-            cardMaintenance.Location = New Point(766, 10)
+            pnlCardsRow.Controls.Add(cardOccupancy, 0, 0)
+            pnlCardsRow.Controls.Add(cardAllocations, 1, 0)
+            pnlCardsRow.Controls.Add(cardFinancial, 2, 0)
+            pnlCardsRow.Controls.Add(cardMaintenance, 3, 0)
 
-            pnlCards.Controls.AddRange({cardOccupancy, cardAllocations, cardFinancial, cardMaintenance})
-
-            ' 3. Metric Summary Strip
-            pnlSummaryStrip = New Panel With {
+            ' 3. Metric Summary Strip Frosted Card
+            cardSummaryStrip = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 36,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .Padding = New Padding(16, 8, 16, 8)
+                .Height = 44,
+                .Margin = New Padding(16, 2, 16, 6),
+                .Padding = New Padding(16, 6, 16, 6),
+                .AccentColor = Color.Transparent,
+                .AccentHeight = 0
             }
-            lblMetric1 = New Label With {.AutoSize = True, .Location = New Point(20, 9), .Font = New Font("Segoe UI Semibold", 9.0F), .ForeColor = ThemeManager.NavyPrimary}
-            lblMetric2 = New Label With {.AutoSize = True, .Location = New Point(300, 9), .Font = New Font("Segoe UI Semibold", 9.0F), .ForeColor = Color.FromArgb(15, 118, 110)}
-            lblMetric3 = New Label With {.AutoSize = True, .Location = New Point(600, 9), .Font = New Font("Segoe UI Semibold", 9.0F), .ForeColor = Color.FromArgb(180, 83, 9)}
-            pnlSummaryStrip.Controls.AddRange({lblMetric1, lblMetric2, lblMetric3})
+
+            lblMetric1 = New Label With {
+                .AutoSize = True,
+                .Location = New Point(18, 12),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextChalkWhite,
+                .BackColor = Color.Transparent
+            }
+
+            lblMetric2 = New Label With {
+                .AutoSize = True,
+                .Location = New Point(320, 12),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.GlassStatusInfo,
+                .BackColor = Color.Transparent
+            }
+
+            lblMetric3 = New Label With {
+                .AutoSize = True,
+                .Location = New Point(640, 12),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.GlassStatusWarning,
+                .BackColor = Color.Transparent
+            }
+
+            cardSummaryStrip.Controls.AddRange({lblMetric1, lblMetric2, lblMetric3})
 
             ' 4. Preview DataGridView
             dgvPreview = New DataGridView With {
-                .Dock = DockStyle.Fill,
-                .BackgroundColor = Color.White,
-                .BorderStyle = BorderStyle.None,
-                .AllowUserToAddRows = False,
-                .AllowUserToDeleteRows = False,
-                .ReadOnly = True,
-                .SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                .MultiSelect = False,
-                .RowHeadersVisible = False,
-                .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+                .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvPreview)
+            ThemeManager.ApplyGlassGridStyle(dgvPreview)
 
-            ' 5. Bottom Action Bar
-            pnlBottomActions = New Panel With {
+            Dim pnlGridContainer As New Panel With {
+                .Dock = DockStyle.Fill,
+                .Padding = New Padding(16, 0, 16, 8),
+                .BackColor = Color.Transparent
+            }
+            pnlGridContainer.Controls.Add(dgvPreview)
+
+            ' 5. Bottom Action Frosted Card
+            cardBottomActions = New PrestigeGlassCard With {
                 .Dock = DockStyle.Bottom,
-                .Height = 54,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 10, 16, 10)
+                .Height = 56,
+                .Margin = New Padding(16, 6, 16, 12),
+                .Padding = New Padding(16, 8, 16, 8),
+                .AccentColor = ThemeManager.GlassBorderGold,
+                .AccentHeight = 2
             }
 
             btnPreviewReport = New Button With {
-                .Text = "🖨️ Preview & Print Document",
-                .BackColor = ThemeManager.NavyPrimary,
+                .Text = "🖨️  Preview & Print Official Document",
+                .BackColor = Color.FromArgb(30, 58, 138),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
-                .Size = New Size(210, 34),
-                .Location = New Point(16, 10)
+                .Size = New Size(240, 32),
+                .Location = New Point(16, 11),
+                .Cursor = Cursors.Hand
             }
-            btnPreviewReport.FlatAppearance.BorderSize = 0
+            btnPreviewReport.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnPreviewReport.FlatAppearance.BorderSize = 1
 
             btnExportHtml = New Button With {
-                .Text = "🌐 Export Web / PDF Report",
-                .BackColor = Color.FromArgb(15, 118, 110),
+                .Text = "🌐  Export Web / PDF Report",
+                .BackColor = Color.FromArgb(16, 185, 129),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
-                .Size = New Size(200, 34),
-                .Location = New Point(236, 10)
+                .Size = New Size(210, 32),
+                .Location = New Point(266, 11),
+                .Cursor = Cursors.Hand
             }
             btnExportHtml.FlatAppearance.BorderSize = 0
 
             btnRefreshData = New Button With {
-                .Text = "🔄 Refresh Data",
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.NavyPrimary,
+                .Text = "🔄  Refresh Data",
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
-                .Font = New Font("Segoe UI", 9.0F),
-                .Size = New Size(120, 34),
-                .Location = New Point(446, 10)
+                .Font = New Font("Segoe UI", 8.5F),
+                .Size = New Size(130, 32),
+                .Location = New Point(486, 11),
+                .Cursor = Cursors.Hand
             }
-            btnRefreshData.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnRefreshData.FlatAppearance.BorderColor = ThemeManager.GlassBorder
 
-            pnlBottomActions.Controls.AddRange({btnPreviewReport, btnExportHtml, btnRefreshData})
+            cardBottomActions.Controls.AddRange({btnPreviewReport, btnExportHtml, btnRefreshData})
 
-            ' Add in correct z-order
-            Controls.Add(dgvPreview)
-            Controls.Add(pnlSummaryStrip)
-            Controls.Add(pnlCards)
-            Controls.Add(pnlFilter)
-            Controls.Add(pnlBottomActions)
+            ' Add in correct layout hierarchy
+            Controls.Add(pnlGridContainer)
+            Controls.Add(cardSummaryStrip)
+            Controls.Add(pnlCardsRow)
+            Controls.Add(cardFilter)
+            Controls.Add(cardBottomActions)
 
             Me.ResumeLayout(False)
 
@@ -203,28 +268,32 @@ Namespace Controls.Views
             SelectReportKind(InstitutionalReportGenerator.ReportKind.Occupancy)
         End Sub
 
-        Private Function CreateReportCard(title As String, subTitle As String, kind As InstitutionalReportGenerator.ReportKind) As Panel
-            Dim pnl As New Panel With {
-                .Size = New Size(240, 78),
-                .BackColor = Color.White,
+        Private Function CreateReportCard(title As String, subTitle As String, kind As InstitutionalReportGenerator.ReportKind) As PrestigeGlassCard
+            Dim pnl As New PrestigeGlassCard With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4),
                 .Cursor = Cursors.Hand,
-                .Tag = kind
+                .Tag = kind,
+                .AccentHeight = 3,
+                .AccentColor = Color.Transparent
             }
 
             Dim lblT As New Label With {
                 .Text = title,
-                .Font = New Font("Segoe UI", 9.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.NavyPrimary,
-                .Location = New Point(12, 12),
-                .AutoSize = True
+                .Font = New Font("Segoe UI Semibold", 9.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextChalkWhite,
+                .Location = New Point(12, 10),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             Dim lblS As New Label With {
                 .Text = subTitle,
                 .Font = New Font("Segoe UI", 8.0F, FontStyle.Regular),
-                .ForeColor = Color.FromArgb(100, 116, 139),
-                .Location = New Point(12, 36),
-                .Size = New Size(215, 30)
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(12, 34),
+                .Size = New Size(210, 28),
+                .BackColor = Color.Transparent
             }
 
             pnl.Controls.AddRange({lblT, lblS})
@@ -240,17 +309,20 @@ Namespace Controls.Views
         Private Sub SelectReportKind(kind As InstitutionalReportGenerator.ReportKind)
             _selectedKind = kind
 
-            ' Highlight selected card
+            ' Highlight selected frosted tile
             Dim cards = {cardOccupancy, cardAllocations, cardFinancial, cardMaintenance}
             For Each c In cards
                 Dim cKind = DirectCast(c.Tag, InstitutionalReportGenerator.ReportKind)
                 If cKind = kind Then
-                    c.BackColor = Color.FromArgb(238, 242, 255)
-                    c.BorderStyle = BorderStyle.FixedSingle
+                    c.FillColor = ThemeManager.GlassCardElevated
+                    c.BorderColor = ThemeManager.GlassBorderFocus
+                    c.AccentColor = ThemeManager.GlassStatusInfo
                 Else
-                    c.BackColor = Color.White
-                    c.BorderStyle = BorderStyle.None
+                    c.FillColor = ThemeManager.GlassCardFill
+                    c.BorderColor = ThemeManager.GlassBorder
+                    c.AccentColor = Color.Transparent
                 End If
+                c.Invalidate()
             Next
 
             ' Toggle filter controls
@@ -328,7 +400,7 @@ Namespace Controls.Views
                     Dim totalPaid = data.Sum(Function(x) x.AmountPaid)
                     Dim totalBal = data.Sum(Function(x) x.BalanceDue)
 
-                    lblMetric1.Text = $"Active Allocations: {data.Count:N0}"
+                    lblMetric1.Text = $"Active Resident Allocations: {data.Count:N0}"
                     lblMetric2.Text = $"Billed Fees: KES {totalBilled:N0}"
                     lblMetric3.Text = $"Outstanding Arrears: KES {totalBal:N0}"
 
@@ -358,21 +430,21 @@ Namespace Controls.Views
                     Dim resolvedCount = data.Where(Function(x) x.MaintenanceStatus = "RESOLVED").Count()
 
                     lblMetric1.Text = $"Total Incidents: {data.Count:N0}"
-                    lblMetric2.Text = $"Active Issues: {reportedCount + inProgCount} ({reportedCount} Reported, {inProgCount} In Progress)"
-                    lblMetric3.Text = $"Resolved Repairs: {resolvedCount}"
+                    lblMetric2.Text = $"Pending: {reportedCount} • In Repair: {inProgCount}"
+                    lblMetric3.Text = $"Resolved Issues: {resolvedCount}"
             End Select
         End Sub
 
         Private Sub PopulateOccupancyGrid(data As List(Of OccupancyReportItem))
             dgvPreview.Columns.Add("Hostel", "Hostel Facility")
-            dgvPreview.Columns.Add("Room", "Room Number")
+            dgvPreview.Columns.Add("Room", "Room")
             dgvPreview.Columns.Add("Floor", "Floor")
-            dgvPreview.Columns.Add("Type", "Room Type")
+            dgvPreview.Columns.Add("RoomType", "Room Type")
             dgvPreview.Columns.Add("Capacity", "Capacity")
             dgvPreview.Columns.Add("Occupied", "Occupied")
             dgvPreview.Columns.Add("Available", "Available")
             dgvPreview.Columns.Add("Status", "Status")
-            dgvPreview.Columns.Add("OccupancyRate", "Occupancy %")
+            dgvPreview.Columns.Add("Rate", "Occupancy %")
 
             For Each it In data
                 dgvPreview.Rows.Add(
@@ -423,7 +495,7 @@ Namespace Controls.Views
             dgvPreview.Columns.Add("Fee", "Invoiced (KES)")
             dgvPreview.Columns.Add("Paid", "Paid (KES)")
             dgvPreview.Columns.Add("Balance", "Balance Due (KES)")
-            dgvPreview.Columns.Add("Status", "Status")
+            dgvPreview.Columns.Add("Status", "Clearance Status")
             dgvPreview.Columns.Add("CollectionRate", "Paid %")
 
             For Each it In data
@@ -457,7 +529,7 @@ Namespace Controls.Views
                     it.TargetDescription,
                     it.IssueTitle,
                     it.MaintenanceStatus,
-                    it.AssignedTo,
+                    If(String.IsNullOrWhiteSpace(it.AssignedTo), "Unassigned", it.AssignedTo),
                     it.ReportedDate.ToString("yyyy-MM-dd"),
                     If(it.ResolvedDate.HasValue, it.ResolvedDate.Value.ToString("yyyy-MM-dd"), "-"),
                     $"{it.DowntimeDays} days"
@@ -469,23 +541,8 @@ Namespace Controls.Views
             Dim semText As String = If(cboSemester.SelectedItem IsNot Nothing, cboSemester.SelectedItem.ToString(), "Current Semester")
             Dim hostelText As String = If(cboHostel.SelectedItem IsNot Nothing, cboHostel.SelectedItem.ToString(), "All Hostels")
 
-            Dim title As String = "INSTITUTIONAL ACCOMMODATION REPORT"
-            Dim subTitle As String = "Hostel Operations Record"
-
-            Select Case _selectedKind
-                Case InstitutionalReportGenerator.ReportKind.Occupancy
-                    title = "Hostel Room Occupancy & Capacity Matrix"
-                    subTitle = "Floor-by-Floor Space Inventory & Vacancy Rates"
-                Case InstitutionalReportGenerator.ReportKind.Allocations
-                    title = "Active Semester Bed Allocations Schedule"
-                    subTitle = "Certified Resident Allocations & Check-In Clearances"
-                Case InstitutionalReportGenerator.ReportKind.FinancialDefaulters
-                    title = "Bursar Revenue & Fee Defaulters Schedule"
-                    subTitle = "Semester Billing, Collections & Outstanding Arrears"
-                Case InstitutionalReportGenerator.ReportKind.Maintenance
-                    title = "Hostel Maintenance & Facility Downtime Audit"
-                    subTitle = "Incident Management, Equipment Repairs & Downtime Tracking"
-            End Select
+            Dim title As String = GetReportTitle(_selectedKind)
+            Dim subTitle As String = GetReportSubtitle(_selectedKind)
 
             Dim totalCount As Integer = 0
             If _cachedData IsNot Nothing Then
@@ -496,7 +553,7 @@ Namespace Controls.Views
             Return New ReportMetadata With {
                 .ReportTitle = title,
                 .Subtitle = subTitle,
-                .GeneratedBy = "Chief Accommodation Officer",
+                .GeneratedBy = "Directorate of Accommodation",
                 .GeneratedAt = DateTime.Now,
                 .SemesterName = semText,
                 .FilterDescription = $"Scope: {hostelText}",
@@ -506,20 +563,20 @@ Namespace Controls.Views
 
         Private Sub btnPreviewReport_Click(sender As Object, e As EventArgs)
             If _cachedData Is Nothing Then
-                MessageBox.Show("No data available to preview.", "Report", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Please load or refresh report data before previewing.", "No Data", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
             Dim meta = BuildReportMetadata()
             Dim generator As New InstitutionalReportGenerator(meta, _selectedKind, _cachedData)
-            Using frm As New frmReportViewerModal(generator, meta.ReportTitle)
-                frm.ShowDialog(Me.FindForm())
+            Using viewer As New frmReportViewerModal(generator, meta.ReportTitle)
+                viewer.ShowDialog(Me.FindForm())
             End Using
         End Sub
 
         Private Sub btnExportHtml_Click(sender As Object, e As EventArgs)
             If _cachedData Is Nothing Then
-                MessageBox.Show("No data available to export.", "Report", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Please load or refresh report data before exporting.", "No Data", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
@@ -544,6 +601,36 @@ Namespace Controls.Views
                 MessageBox.Show($"Export error: {ex.Message}", "Error Exporting Report", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Try
         End Sub
+
+        Private Function GetReportTitle(kind As InstitutionalReportGenerator.ReportKind) As String
+            Select Case kind
+                Case InstitutionalReportGenerator.ReportKind.Occupancy
+                    Return "Hostel Facility Space Inventory & Occupancy Matrix"
+                Case InstitutionalReportGenerator.ReportKind.Allocations
+                    Return "Resident Bed Allocations & Tenancy Schedule"
+                Case InstitutionalReportGenerator.ReportKind.FinancialDefaulters
+                    Return "Bursar Student Accommodation Fee Collection & Arrears Schedule"
+                Case InstitutionalReportGenerator.ReportKind.Maintenance
+                    Return "Hostel Maintenance Incidents & Facility Downtime Register"
+                Case Else
+                    Return "Accommodation Directorate Institutional Report"
+            End Select
+        End Function
+
+        Private Function GetReportSubtitle(kind As InstitutionalReportGenerator.ReportKind) As String
+            Select Case kind
+                Case InstitutionalReportGenerator.ReportKind.Occupancy
+                    Return "Campus-Wide Bed Space Capacity, Resident Allocation Distribution & Vacancy Rates"
+                Case InstitutionalReportGenerator.ReportKind.Allocations
+                    Return "Official Semester Resident Allocations, Frozen Rates & Check-In Clearance Verification"
+                Case InstitutionalReportGenerator.ReportKind.FinancialDefaulters
+                    Return "Comprehensive Bursar Audit of Fee Obligations, Multi-Channel Collections & Student Arrears"
+                Case InstitutionalReportGenerator.ReportKind.Maintenance
+                    Return "Audit Log of Reported Property Defects, Technician Repairs & Bed-Space Maintenance Locks"
+                Case Else
+                    Return "Official Academic Record"
+            End Select
+        End Function
 
         Private Class FilterItem
             Public Property Id As Integer

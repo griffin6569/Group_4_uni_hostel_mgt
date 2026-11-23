@@ -1,6 +1,7 @@
 Imports System.Drawing
 Imports System.IO
 Imports System.Windows.Forms
+Imports University_hostel_mgt.Controls
 Imports University_hostel_mgt.Data.Repositories
 Imports University_hostel_mgt.Forms.Maintenance
 Imports University_hostel_mgt.Helpers
@@ -11,6 +12,7 @@ Namespace Controls.Views
     ''' Institutional Hostel Maintenance & Defect Tracking Desk Control.
     ''' Coordinates incident reporting, staff assignment, evidence photographs,
     ''' and automatic bed-space maintenance locking.
+    ''' Built strictly with Option B: Frosted Glassmorphism & Acrylic widgets.
     ''' </summary>
     Public Class MaintenanceControl
         Inherits UserControl
@@ -19,11 +21,16 @@ Namespace Controls.Views
         Private ReadOnly _maintenanceRepo As New MaintenanceRepository()
         Private ReadOnly _hostelRepo As New HostelRepository()
 
-        Private pnlKpi As Panel
-        Private pnlFilter As Panel
+        Private pnlKpiRow As TableLayoutPanel
+        Private kpiTotal As GlassKpiWidget
+        Private kpiReported As GlassKpiWidget
+        Private kpiInProgress As GlassKpiWidget
+        Private kpiResolved As GlassKpiWidget
+
+        Private cardFilter As PrestigeGlassCard
         Private cboStatus As ComboBox
         Private cboHostel As ComboBox
-        Private txtSearch As TextBox
+        Private txtSearch As GlassSearchBox
         Private btnReportNew As Button
         Private btnEdit As Button
         Private btnResolve As Button
@@ -33,7 +40,8 @@ Namespace Controls.Views
         Private dgvMaintenance As DataGridView
 
         ' Detail / Evidence Sidebar
-        Private pnlDetail As Panel
+        Private cardDetail As PrestigeGlassCard
+        Private lblDetailHead As Label
         Private lblDetailTitle As Label
         Private lblDetailTarget As Label
         Private lblDetailStatus As Label
@@ -49,195 +57,285 @@ Namespace Controls.Views
             _currentUserId = currentUserId
             InitializeUI()
             Dock = DockStyle.Fill
-            BackColor = Color.FromArgb(248, 250, 252)
+            BackColor = ThemeManager.CanvasDark
         End Sub
 
         Private Sub InitializeUI()
             Me.SuspendLayout()
 
-            ' 1. KPI Panel
-            pnlKpi = New Panel With {
+            ' 1. KPI Panel (Responsive 4-Widget Grid)
+            pnlKpiRow = New TableLayoutPanel With {
                 .Dock = DockStyle.Top,
-                .Height = 84,
-                .BackColor = Color.FromArgb(248, 250, 252),
-                .Padding = New Padding(16, 8, 16, 8)
+                .Height = 100,
+                .ColumnCount = 4,
+                .RowCount = 1,
+                .BackColor = ThemeManager.CanvasDark,
+                .Padding = New Padding(16, 12, 16, 8)
+            }
+            pnlKpiRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlKpiRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlKpiRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+            pnlKpiRow.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 25.0F))
+
+            kpiTotal = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(0, 0, 6, 0),
+                .CategoryTitle = "TOTAL INCIDENTS",
+                .PrimaryValue = "0",
+                .Subtitle = "Campus-wide defects logged",
+                .AccentColor = ThemeManager.GlassStatusInfo,
+                .IconSymbol = "📋"
             }
 
-            ' 2. Filter & Action Ribbon
-            pnlFilter = New Panel With {
-                .Dock = DockStyle.Top,
-                .Height = 52,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 10, 16, 10)
+            kpiReported = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "PENDING / LOCKED",
+                .PrimaryValue = "0",
+                .Subtitle = "Beds locked to maintenance",
+                .AccentColor = ThemeManager.GlassStatusDanger,
+                .ValueColor = ThemeManager.GlassStatusDanger,
+                .IconSymbol = "⚠️"
             }
 
-            Dim lblSt As New Label With {.Text = "Status:", .AutoSize = True, .Location = New Point(16, 17), .Font = New Font("Segoe UI Semibold", 8.5F)}
-            cboStatus = New ComboBox With {.Location = New Point(65, 14), .Width = 130, .DropDownStyle = ComboBoxStyle.DropDownList}
+            kpiInProgress = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(4, 0, 4, 0),
+                .CategoryTitle = "IN PROGRESS",
+                .PrimaryValue = "0",
+                .Subtitle = "Under active technician repair",
+                .AccentColor = ThemeManager.GlassStatusWarning,
+                .ValueColor = ThemeManager.GlassStatusWarning,
+                .IconSymbol = "🔧"
+            }
+
+            kpiResolved = New GlassKpiWidget With {
+                .Dock = DockStyle.Fill,
+                .Margin = New Padding(6, 0, 0, 0),
+                .CategoryTitle = "RESOLVED ISSUES",
+                .PrimaryValue = "0",
+                .Subtitle = "Restored to student occupancy",
+                .AccentColor = ThemeManager.GlassStatusSuccess,
+                .ValueColor = ThemeManager.GlassStatusSuccess,
+                .IconSymbol = "✅"
+            }
+
+            pnlKpiRow.Controls.Add(kpiTotal, 0, 0)
+            pnlKpiRow.Controls.Add(kpiReported, 1, 0)
+            pnlKpiRow.Controls.Add(kpiInProgress, 2, 0)
+            pnlKpiRow.Controls.Add(kpiResolved, 3, 0)
+
+            ' 2. Filter & Action Ribbon (Frosted Glass Card)
+            cardFilter = New PrestigeGlassCard With {
+                .Dock = DockStyle.Top,
+                .Height = 58,
+                .Margin = New Padding(16, 0, 16, 8),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
+            }
+
+            Dim lblSt As New Label With {
+                .Text = "Status:",
+                .AutoSize = True,
+                .Location = New Point(16, 19),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .BackColor = Color.Transparent
+            }
+
+            cboStatus = New ComboBox With {
+                .Location = New Point(68, 15),
+                .Width = 120,
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White
+            }
             cboStatus.Items.AddRange({"ALL", "REPORTED", "IN_PROGRESS", "RESOLVED", "CANCELLED"})
             cboStatus.SelectedIndex = 0
 
-            Dim lblH As New Label With {.Text = "Hostel:", .AutoSize = True, .Location = New Point(205, 17), .Font = New Font("Segoe UI Semibold", 8.5F)}
-            cboHostel = New ComboBox With {.Location = New Point(255, 14), .Width = 150, .DropDownStyle = ComboBoxStyle.DropDownList}
+            Dim lblH As New Label With {
+                .Text = "Hostel:",
+                .AutoSize = True,
+                .Location = New Point(200, 19),
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .BackColor = Color.Transparent
+            }
 
-            txtSearch = New TextBox With {.Location = New Point(420, 14), .Width = 180, .PlaceholderText = "🔍 Search issue, room, staff..."}
+            cboHostel = New ComboBox With {
+                .Location = New Point(252, 15),
+                .Width = 145,
+                .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White
+            }
+
+            txtSearch = New GlassSearchBox With {
+                .Location = New Point(410, 11),
+                .Width = 200,
+                .Placeholder = "Search defect, room..."
+            }
 
             btnReportNew = New Button With {
                 .Text = "➕ Report Incident",
-                .BackColor = ThemeManager.NavyPrimary,
+                .BackColor = Color.FromArgb(30, 58, 138),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .Size = New Size(140, 28),
-                .Location = New Point(615, 12)
+                .Size = New Size(135, 30),
+                .Location = New Point(625, 14),
+                .Cursor = Cursors.Hand
             }
-            btnReportNew.FlatAppearance.BorderSize = 0
+            btnReportNew.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnReportNew.FlatAppearance.BorderSize = 1
 
             btnResolve = New Button With {
                 .Text = "✅ Resolve & Restore",
-                .BackColor = Color.FromArgb(5, 150, 105),
+                .BackColor = Color.FromArgb(16, 185, 129),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .Size = New Size(145, 28),
-                .Location = New Point(765, 12),
-                .Enabled = False
+                .Size = New Size(140, 30),
+                .Location = New Point(768, 14),
+                .Enabled = False,
+                .Cursor = Cursors.Hand
             }
             btnResolve.FlatAppearance.BorderSize = 0
 
             btnEdit = New Button With {
                 .Text = "✏️ Edit / Assign",
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.NavyPrimary,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI", 8.5F),
-                .Size = New Size(115, 28),
-                .Location = New Point(920, 12),
-                .Enabled = False
+                .Size = New Size(115, 30),
+                .Location = New Point(916, 14),
+                .Enabled = False,
+                .Cursor = Cursors.Hand
             }
-            btnEdit.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnEdit.FlatAppearance.BorderColor = ThemeManager.GlassBorder
 
             btnRefresh = New Button With {
                 .Text = "🔄",
-                .BackColor = Color.FromArgb(241, 245, 249),
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
-                .Size = New Size(32, 28),
-                .Location = New Point(1045, 12)
+                .Size = New Size(32, 30),
+                .Location = New Point(1039, 14),
+                .Cursor = Cursors.Hand
             }
-            btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225)
+            btnRefresh.FlatAppearance.BorderColor = ThemeManager.GlassBorder
 
-            pnlFilter.Controls.AddRange({lblSt, cboStatus, lblH, cboHostel, txtSearch, btnReportNew, btnResolve, btnEdit, btnRefresh})
+            cardFilter.Controls.AddRange({lblSt, cboStatus, lblH, cboHostel, txtSearch, btnReportNew, btnResolve, btnEdit, btnRefresh})
 
             ' 3. Split Container (Data Grid + Detail/Evidence Pane)
             splitBody = New SplitContainer With {
                 .Dock = DockStyle.Fill,
                 .Orientation = Orientation.Vertical,
-                .SplitterDistance = 720,
-                .SplitterWidth = 6,
-                .BackColor = Color.FromArgb(226, 232, 240)
+                .SplitterDistance = 730,
+                .SplitterWidth = 8,
+                .BackColor = ThemeManager.CanvasDark,
+                .Padding = New Padding(16, 0, 16, 16)
             }
 
             ' DataGridView
             dgvMaintenance = New DataGridView With {
-                .Dock = DockStyle.Fill,
-                .BackgroundColor = Color.White,
-                .BorderStyle = BorderStyle.None,
-                .AllowUserToAddRows = False,
-                .AllowUserToDeleteRows = False,
-                .ReadOnly = True,
-                .SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                .MultiSelect = False,
-                .RowHeadersVisible = False,
-                .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+                .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvMaintenance)
+            ThemeManager.ApplyGlassGridStyle(dgvMaintenance)
             splitBody.Panel1.Controls.Add(dgvMaintenance)
 
-            ' Detail & Evidence Panel
-            pnlDetail = New Panel With {
+            ' Detail & Evidence Frosted Card
+            cardDetail = New PrestigeGlassCard With {
                 .Dock = DockStyle.Fill,
-                .BackColor = Color.White,
-                .Padding = New Padding(16)
+                .Padding = New Padding(16, 14, 16, 14),
+                .AccentColor = ThemeManager.GlassStatusWarning,
+                .AccentHeight = 3
             }
 
-            Dim lblDetailHead As New Label With {
+            lblDetailHead = New Label With {
                 .Text = "DEFECT EVIDENCE & RESOLUTION",
-                .Font = New Font("Segoe UI", 9.0F, FontStyle.Bold),
-                .ForeColor = ThemeManager.NavyPrimary,
-                .Location = New Point(16, 12),
+                .Font = New Font("Segoe UI", 8.5F, FontStyle.Bold),
+                .ForeColor = ThemeManager.GlassStatusInfo,
+                .Location = New Point(16, 14),
                 .AutoSize = True
             }
 
             lblDetailTitle = New Label With {
                 .Text = "Select an incident to view details",
                 .Font = New Font("Segoe UI Semibold", 10.0F, FontStyle.Bold),
-                .ForeColor = Color.FromArgb(15, 23, 42),
-                .Location = New Point(16, 36),
-                .Size = New Size(300, 24)
+                .ForeColor = ThemeManager.TextChalkWhite,
+                .Location = New Point(16, 38),
+                .Size = New Size(330, 24)
             }
 
             lblDetailTarget = New Label With {
                 .Text = "-",
                 .Font = New Font("Segoe UI", 8.5F),
-                .ForeColor = Color.FromArgb(100, 116, 139),
-                .Location = New Point(16, 62),
-                .Size = New Size(300, 18)
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(16, 64),
+                .Size = New Size(330, 18)
             }
 
             lblDetailStatus = New Label With {
                 .Text = "STATUS",
-                .Font = New Font("Segoe UI", 7.5F, FontStyle.Bold),
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = Color.FromArgb(71, 85, 105),
-                .Location = New Point(16, 84),
+                .Font = New Font("Segoe UI", 8.0F, FontStyle.Bold),
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextChalkWhite,
+                .Location = New Point(16, 86),
                 .Size = New Size(110, 22),
                 .TextAlign = ContentAlignment.MiddleCenter
             }
 
             txtDetailDesc = New TextBox With {
                 .Location = New Point(16, 114),
-                .Size = New Size(300, 60),
+                .Size = New Size(330, 60),
                 .Multiline = True,
                 .ReadOnly = True,
-                .BackColor = Color.FromArgb(248, 250, 252),
-                .BorderStyle = BorderStyle.FixedSingle,
+                .BackColor = Color.FromArgb(12, 19, 31),
+                .ForeColor = ThemeManager.TextPlatinum,
+                .BorderStyle = BorderStyle.None,
                 .Font = New Font("Segoe UI", 8.5F),
                 .ScrollBars = ScrollBars.Vertical
             }
 
             picDetailEvidence = New PictureBox With {
-                .Location = New Point(16, 184),
-                .Size = New Size(300, 150),
+                .Location = New Point(16, 182),
+                .Size = New Size(330, 150),
                 .SizeMode = PictureBoxSizeMode.Zoom,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .BorderStyle = BorderStyle.FixedSingle
+                .BackColor = Color.FromArgb(12, 19, 31),
+                .BorderStyle = BorderStyle.None
             }
 
             lblDetailAssigned = New Label With {
                 .Text = "Assigned: -",
                 .Font = New Font("Segoe UI Semibold", 8.5F),
-                .ForeColor = ThemeManager.NavyPrimary,
-                .Location = New Point(16, 342),
-                .Size = New Size(300, 20)
+                .ForeColor = ThemeManager.GlassStatusInfo,
+                .Location = New Point(16, 340),
+                .Size = New Size(330, 20),
+                .BackColor = Color.Transparent
             }
 
             txtDetailResolution = New TextBox With {
-                .Location = New Point(16, 368),
-                .Size = New Size(300, 60),
+                .Location = New Point(16, 364),
+                .Size = New Size(330, 60),
                 .Multiline = True,
                 .ReadOnly = True,
-                .BackColor = Color.FromArgb(248, 250, 252),
-                .BorderStyle = BorderStyle.FixedSingle,
+                .BackColor = Color.FromArgb(12, 19, 31),
+                .ForeColor = ThemeManager.TextPlatinum,
+                .BorderStyle = BorderStyle.None,
                 .Font = New Font("Segoe UI", 8.5F),
                 .PlaceholderText = "Resolution notes will appear here once certified."
             }
 
-            pnlDetail.Controls.AddRange({lblDetailHead, lblDetailTitle, lblDetailTarget, lblDetailStatus, txtDetailDesc, picDetailEvidence, lblDetailAssigned, txtDetailResolution})
-            splitBody.Panel2.Controls.Add(pnlDetail)
+            cardDetail.Controls.AddRange({lblDetailHead, lblDetailTitle, lblDetailTarget, lblDetailStatus, txtDetailDesc, picDetailEvidence, lblDetailAssigned, txtDetailResolution})
+            splitBody.Panel2.Controls.Add(cardDetail)
 
             ' Assemble Controls
             Controls.Add(splitBody)
-            Controls.Add(pnlFilter)
-            Controls.Add(pnlKpi)
+            Controls.Add(cardFilter)
+            Controls.Add(pnlKpiRow)
 
             Me.ResumeLayout(False)
 
@@ -248,7 +346,7 @@ Namespace Controls.Views
             AddHandler btnRefresh.Click, Sub() LoadMaintenanceData()
             AddHandler cboStatus.SelectedIndexChanged, Sub() LoadMaintenanceData()
             AddHandler cboHostel.SelectedIndexChanged, Sub() LoadMaintenanceData()
-            AddHandler txtSearch.TextChanged, Sub() LoadMaintenanceData()
+            AddHandler txtSearch.SearchTextChanged, Sub() LoadMaintenanceData()
             AddHandler dgvMaintenance.SelectionChanged, AddressOf dgvMaintenance_SelectionChanged
             AddHandler dgvMaintenance.CellFormatting, AddressOf dgvMaintenance_CellFormatting
         End Sub
@@ -273,7 +371,7 @@ Namespace Controls.Views
                 Dim it = DirectCast(cboHostel.SelectedItem, ComboItem)
                 If it.Id > 0 Then hostelId = it.Id
             End If
-            Dim searchTerm = txtSearch.Text.Trim()
+            Dim searchTerm = txtSearch.QueryText.Trim()
 
             _records = _maintenanceRepo.GetMaintenanceRecords(statusFilter, hostelId, searchTerm)
             PopulateGrid(_records)
@@ -321,7 +419,6 @@ Namespace Controls.Views
         End Sub
 
         Private Sub UpdateKpiCards()
-            pnlKpi.Controls.Clear()
             Dim stats = _maintenanceRepo.GetMaintenanceSummaryCounts()
 
             Dim total = stats("TOTAL")
@@ -329,54 +426,11 @@ Namespace Controls.Views
             Dim inProgress = If(stats.ContainsKey("IN_PROGRESS"), stats("IN_PROGRESS"), 0)
             Dim resolved = If(stats.ContainsKey("RESOLVED"), stats("RESOLVED"), 0)
 
-            Dim c1 = CreateKpiCard("TOTAL INCIDENTS", total.ToString(), "Campus-Wide Issues Logged", ThemeManager.NavyPrimary, 16)
-            Dim c2 = CreateKpiCard("PENDING / REPORTED", reported.ToString(), "Beds Locked to Maintenance", Color.FromArgb(220, 38, 38), 246)
-            Dim c3 = CreateKpiCard("IN PROGRESS", inProgress.ToString(), "Under Active Technician Repair", Color.FromArgb(217, 119, 6), 476)
-            Dim c4 = CreateKpiCard("RESOLVED ISSUES", resolved.ToString(), "Restored to Occupancy", Color.FromArgb(5, 150, 105), 706)
-
-            pnlKpi.Controls.AddRange({c1, c2, c3, c4})
+            kpiTotal.PrimaryValue = total.ToString()
+            kpiReported.PrimaryValue = reported.ToString()
+            kpiInProgress.PrimaryValue = inProgress.ToString()
+            kpiResolved.PrimaryValue = resolved.ToString()
         End Sub
-
-        Private Function CreateKpiCard(title As String, value As String, subText As String, accentColor As Color, xPos As Integer) As Panel
-            Dim pnl As New Panel With {
-                .Size = New Size(215, 68),
-                .Location = New Point(xPos, 8),
-                .BackColor = Color.White
-            }
-
-            Dim pnlStripe As New Panel With {
-                .Dock = DockStyle.Left,
-                .Width = 4,
-                .BackColor = accentColor
-            }
-
-            Dim lblT As New Label With {
-                .Text = title,
-                .Font = New Font("Segoe UI", 7.5F, FontStyle.Bold),
-                .ForeColor = Color.FromArgb(100, 116, 139),
-                .Location = New Point(12, 8),
-                .AutoSize = True
-            }
-
-            Dim lblV As New Label With {
-                .Text = value,
-                .Font = New Font("Segoe UI", 14.0F, FontStyle.Bold),
-                .ForeColor = accentColor,
-                .Location = New Point(12, 24),
-                .AutoSize = True
-            }
-
-            Dim lblS As New Label With {
-                .Text = subText,
-                .Font = New Font("Segoe UI", 7.0F),
-                .ForeColor = Color.FromArgb(148, 163, 184),
-                .Location = New Point(12, 48),
-                .AutoSize = True
-            }
-
-            pnl.Controls.AddRange({pnlStripe, lblT, lblV, lblS})
-            Return pnl
-        End Function
 
         Private Sub dgvMaintenance_SelectionChanged(sender As Object, e As EventArgs)
             If dgvMaintenance.SelectedRows.Count > 0 Then
@@ -422,8 +476,8 @@ Namespace Controls.Views
             lblDetailTitle.Text = "No Incident Selected"
             lblDetailTarget.Text = "-"
             lblDetailStatus.Text = "STATUS"
-            lblDetailStatus.BackColor = Color.FromArgb(241, 245, 249)
-            lblDetailStatus.ForeColor = Color.FromArgb(71, 85, 105)
+            lblDetailStatus.BackColor = Color.FromArgb(30, 42, 60)
+            lblDetailStatus.ForeColor = ThemeManager.TextSilverSlate
             txtDetailDesc.Clear()
             lblDetailAssigned.Text = "Assigned: -"
             txtDetailResolution.Clear()
@@ -435,16 +489,16 @@ Namespace Controls.Views
                 Dim st = e.Value.ToString().ToUpperInvariant()
                 Select Case st
                     Case "REPORTED"
-                        e.CellStyle.ForeColor = Color.FromArgb(220, 38, 38)
+                        e.CellStyle.ForeColor = ThemeManager.GlassStatusDanger
                         e.CellStyle.Font = New Font(dgvMaintenance.Font, FontStyle.Bold)
                     Case "IN_PROGRESS"
-                        e.CellStyle.ForeColor = Color.FromArgb(217, 119, 6)
+                        e.CellStyle.ForeColor = ThemeManager.GlassStatusWarning
                         e.CellStyle.Font = New Font(dgvMaintenance.Font, FontStyle.Bold)
                     Case "RESOLVED"
-                        e.CellStyle.ForeColor = Color.FromArgb(5, 150, 105)
+                        e.CellStyle.ForeColor = ThemeManager.GlassStatusSuccess
                         e.CellStyle.Font = New Font(dgvMaintenance.Font, FontStyle.Bold)
                     Case "CANCELLED"
-                        e.CellStyle.ForeColor = Color.FromArgb(100, 116, 139)
+                        e.CellStyle.ForeColor = ThemeManager.TextMutedSlate
                 End Select
             End If
         End Sub

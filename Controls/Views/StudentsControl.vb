@@ -35,44 +35,50 @@ Namespace Controls.Views
 
         Private Sub InitializeComponents()
             Me.Dock = DockStyle.Fill
-            Me.BackColor = ThemeManager.SurfaceCanvas
+            Me.BackColor = ThemeManager.CanvasDark
             Me.Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
 
             ' =========================================================================
             ' FILTER / ACTION BAR
             ' =========================================================================
-            pnlFilterBar = New Panel With {
+            pnlFilterBar = New PrestigeGlassCard With {
                 .Dock = DockStyle.Top,
-                .Height = 56,
-                .BackColor = Color.White,
-                .Padding = New Padding(16, 12, 16, 12)
+                .Height = 58,
+                .Margin = New Padding(16, 12, 16, 6),
+                .Padding = New Padding(16, 10, 16, 10),
+                .AccentColor = ThemeManager.GlassBorderFocus,
+                .AccentHeight = 2
             }
-            AddHandler pnlFilterBar.Paint, Sub(s, e)
-                                               Using pen As New Pen(ThemeManager.BorderSubtle, 1.0F)
-                                                   e.Graphics.DrawLine(pen, 0, pnlFilterBar.Height - 1, pnlFilterBar.Width, pnlFilterBar.Height - 1)
-                                               End Using
-                                           End Sub
+
+            Dim txtSearchControl As New GlassSearchBox With {
+                .Location = New Point(16, 11),
+                .Size = New Size(240, 34),
+                .Placeholder = "Search Reg No, Name, Email..."
+            }
+            AddHandler txtSearchControl.SearchTextChanged, Sub()
+                                                               txtSearch.Text = txtSearchControl.QueryText
+                                                               ApplyFilters()
+                                                           End Sub
 
             txtSearch = New TextBox With {
-                .Location = New Point(16, 14),
-                .Size = New Size(240, 26),
-                .PlaceholderText = "🔍  Search by Reg No, Name, Email...",
-                .Font = New Font("Segoe UI", 9.5F, FontStyle.Regular)
+                .Visible = False
             }
-            AddHandler txtSearch.TextChanged, Sub() ApplyFilters()
 
             Dim lblDept As New Label With {
                 .Text = "Dept:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(270, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(268, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboDeptFilter = New ComboBox With {
                 .Location = New Point(310, 15),
                 .Size = New Size(170, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboDeptFilter.Items.AddRange(New Object() {"ALL DEPARTMENTS", "School of Computing", "School of Business", "School of Engineering", "School of Health Sciences", "School of Humanities", "School of Law", "School of Education"})
@@ -82,15 +88,18 @@ Namespace Controls.Views
             Dim lblStatus As New Label With {
                 .Text = "Status:",
                 .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
-                .ForeColor = ThemeManager.TextSlateSecondary,
-                .Location = New Point(495, 18),
-                .AutoSize = True
+                .ForeColor = ThemeManager.TextSilverSlate,
+                .Location = New Point(495, 19),
+                .AutoSize = True,
+                .BackColor = Color.Transparent
             }
 
             cboStatusFilter = New ComboBox With {
                 .Location = New Point(542, 15),
                 .Size = New Size(130, 24),
                 .DropDownStyle = ComboBoxStyle.DropDownList,
+                .BackColor = Color.FromArgb(16, 26, 42),
+                .ForeColor = Color.White,
                 .Font = New Font("Segoe UI", 9.0F, FontStyle.Regular)
             }
             cboStatusFilter.Items.AddRange(New Object() {"ALL STATUSES", "ACTIVE", "SUSPENDED", "GRADUATED", "DEFERRED"})
@@ -99,47 +108,48 @@ Namespace Controls.Views
 
             btnNewStudent = New Button With {
                 .Text = "＋ Register Student",
-                .Size = New Size(150, 30),
-                .Location = New Point(pnlFilterBar.Width - 360, 13),
+                .Size = New Size(150, 32),
+                .Location = New Point(pnlFilterBar.Width - 350, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = ThemeManager.NavyDark,
+                .BackColor = Color.FromArgb(30, 58, 138),
                 .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnNewStudent.FlatAppearance.BorderSize = 0
+            btnNewStudent.FlatAppearance.BorderColor = Color.FromArgb(56, 189, 248)
+            btnNewStudent.FlatAppearance.BorderSize = 1
             AddHandler btnNewStudent.Click, AddressOf BtnNewStudent_Click
 
             btnEditStudent = New Button With {
                 .Text = "✎ Edit Selected",
-                .Size = New Size(120, 30),
-                .Location = New Point(pnlFilterBar.Width - 200, 13),
+                .Size = New Size(120, 32),
+                .Location = New Point(pnlFilterBar.Width - 190, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = ThemeManager.TextPlatinum,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnEditStudent.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnEditStudent.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnEditStudent.Click, AddressOf BtnEditStudent_Click
 
             btnRefresh = New Button With {
                 .Text = "↻",
-                .Size = New Size(34, 30),
-                .Location = New Point(pnlFilterBar.Width - 70, 13),
+                .Size = New Size(34, 32),
+                .Location = New Point(pnlFilterBar.Width - 60, 12),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
-                .BackColor = Color.FromArgb(241, 245, 249),
-                .ForeColor = ThemeManager.TextDeepSlate,
+                .BackColor = Color.FromArgb(30, 42, 60),
+                .ForeColor = Color.White,
                 .FlatStyle = FlatStyle.Flat,
                 .Font = New Font("Segoe UI Semibold", 10.0F, FontStyle.Bold),
                 .Cursor = Cursors.Hand
             }
-            btnRefresh.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            btnRefresh.FlatAppearance.BorderColor = ThemeManager.GlassBorder
             AddHandler btnRefresh.Click, Sub() LoadStudentsData()
 
-            pnlFilterBar.Controls.AddRange({txtSearch, lblDept, cboDeptFilter, lblStatus, cboStatusFilter, btnNewStudent, btnEditStudent, btnRefresh})
+            pnlFilterBar.Controls.AddRange({txtSearchControl, txtSearch, lblDept, cboDeptFilter, lblStatus, cboStatusFilter, btnNewStudent, btnEditStudent, btnRefresh})
 
             ' =========================================================================
             ' DATA GRID VIEW
@@ -147,7 +157,7 @@ Namespace Controls.Views
             dgvStudents = New DataGridView With {
                 .Dock = DockStyle.Fill
             }
-            ThemeManager.ApplyPrestigeGridStyle(dgvStudents)
+            ThemeManager.ApplyGlassGridStyle(dgvStudents)
             SetupGridColumns()
 
             AddHandler dgvStudents.CellDoubleClick, Sub(s, e)
@@ -228,13 +238,15 @@ Namespace Controls.Views
 
                 ' Visual indicator for balances or suspended students
                 If s.TotalBalanceOwed > 0 Then
-                    dgvStudents.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.StatusWarning
+                    dgvStudents.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.GlassStatusWarning
                 Else
-                    dgvStudents.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.StatusSuccess
+                    dgvStudents.Rows(rowIdx).Cells("Balance").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 End If
 
                 If s.StudentStatus = "SUSPENDED" Then
-                    dgvStudents.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.StatusDanger
+                    dgvStudents.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusDanger
+                ElseIf s.StudentStatus = "ACTIVE" Then
+                    dgvStudents.Rows(rowIdx).Cells("Status").Style.ForeColor = ThemeManager.GlassStatusSuccess
                 End If
             Next
         End Sub
