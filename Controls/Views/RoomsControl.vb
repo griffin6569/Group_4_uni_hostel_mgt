@@ -25,6 +25,7 @@ Namespace Controls.Views
         Private cboStatusFilter As ComboBox
         Private btnNewRoom As Button
         Private btnEditRoom As Button
+        Private btnGallery As Button
         Private btnRefresh As Button
         Private dgvRooms As DataGridView
 
@@ -136,8 +137,8 @@ Namespace Controls.Views
 
             btnEditRoom = New Button With {
                 .Text = "✎ Edit Selected",
-                .Size = New Size(120, 30),
-                .Location = New Point(pnlFilterBar.Width - 200, 13),
+                .Size = New Size(110, 30),
+                .Location = New Point(pnlFilterBar.Width - 215, 13),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
                 .BackColor = Color.FromArgb(241, 245, 249),
                 .ForeColor = ThemeManager.TextDeepSlate,
@@ -148,10 +149,24 @@ Namespace Controls.Views
             btnEditRoom.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
             AddHandler btnEditRoom.Click, AddressOf BtnEditRoom_Click
 
+            btnGallery = New Button With {
+                .Text = "📷 Photos",
+                .Size = New Size(95, 30),
+                .Location = New Point(pnlFilterBar.Width - 100, 13),
+                .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
+                .BackColor = Color.FromArgb(241, 245, 249),
+                .ForeColor = ThemeManager.NavyPrimary,
+                .FlatStyle = FlatStyle.Flat,
+                .Font = New Font("Segoe UI Semibold", 8.5F, FontStyle.Bold),
+                .Cursor = Cursors.Hand
+            }
+            btnGallery.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
+            AddHandler btnGallery.Click, AddressOf BtnGallery_Click
+
             btnRefresh = New Button With {
                 .Text = "↻",
                 .Size = New Size(34, 30),
-                .Location = New Point(pnlFilterBar.Width - 70, 13),
+                .Location = New Point(pnlFilterBar.Width - 45, 13),
                 .Anchor = AnchorStyles.Top Or AnchorStyles.Right,
                 .BackColor = Color.FromArgb(241, 245, 249),
                 .ForeColor = ThemeManager.TextDeepSlate,
@@ -162,7 +177,7 @@ Namespace Controls.Views
             btnRefresh.FlatAppearance.BorderColor = ThemeManager.BorderSubtle
             AddHandler btnRefresh.Click, Sub() LoadRoomsData()
 
-            pnlFilterBar.Controls.AddRange({txtSearch, lblHostel, cboHostelFilter, lblType, cboRoomTypeFilter, lblStatus, cboStatusFilter, btnNewRoom, btnEditRoom, btnRefresh})
+            pnlFilterBar.Controls.AddRange({txtSearch, lblHostel, cboHostelFilter, lblType, cboRoomTypeFilter, lblStatus, cboStatusFilter, btnNewRoom, btnEditRoom, btnGallery, btnRefresh})
 
             dgvRooms = New DataGridView With {
                 .Dock = DockStyle.Fill
@@ -302,6 +317,21 @@ Namespace Controls.Views
                 If modal.ShowDialog(Me.FindForm()) = DialogResult.OK Then
                     LoadRoomsData()
                 End If
+            End Using
+        End Sub
+
+        Private Sub BtnGallery_Click(sender As Object, e As EventArgs)
+            If dgvRooms.SelectedRows.Count = 0 Then
+                MessageBox.Show("Please select a room from the table to view its photo gallery.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Return
+            End If
+
+            Dim roomId As Integer = Convert.ToInt32(dgvRooms.SelectedRows(0).Cells("RoomId").Value)
+            Dim hostelName As String = dgvRooms.SelectedRows(0).Cells("HostelName").Value.ToString()
+            Dim roomNum As String = dgvRooms.SelectedRows(0).Cells("RoomNumber").Value.ToString()
+
+            Using modal As New Forms.Rooms.frmRoomGalleryModal(roomId, hostelName, roomNum)
+                modal.ShowDialog(Me.FindForm())
             End Using
         End Sub
     End Class
